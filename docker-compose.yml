@@ -1,0 +1,25 @@
+services:
+
+  postgres:
+    image: postgres:latest
+    environment:
+      - "POSTGRES_USER=dbuser"
+      - "POSTGRES_PASSWORD=1q2w3e4r5t"
+      - "POSTGRES_DB=sanjab"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  app:
+    build: .
+    command: /bin/sh -c "python src/manage.py runserver 0.0.0.0:8000 && 
+              python src/manage.py makemigrations && python src/manage.py migrate"
+    restart: always
+    volumes:
+      - .:/src
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+
