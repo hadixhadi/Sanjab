@@ -9,3 +9,4 @@ COPY ./src /src
 EXPOSE 8000
 
 RUN pip install -r /requirments/requrments.txt
+CMD python src/manage.py migrate
