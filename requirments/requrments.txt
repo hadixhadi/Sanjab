@@ -15,6 +15,7 @@ itypes==1.2.0
 Jinja2==3.1.2
 jsonschema==4.20.0
 jsonschema-specifications==2023.11.2
+kavenegar==1.1.2
 MarkupSafe==2.1.3
 openapi-codec==1.3.2
 psycopg2-binary==2.9.9

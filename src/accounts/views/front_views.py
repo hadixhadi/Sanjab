@@ -37,17 +37,20 @@ class UserVeryfication(APIView):
         user_phone_number=request.session['parent_register_info']['phone_number']
         instance=OtpCode.objects.get(phone_number=user_phone_number)
         ser_data=UserVerificationCodeSerializer(data=request.data)
+        current_time=timezone.now().time()
         if ser_data.is_valid():
-            if ser_data.data['code'] == instance.code and instance.expire_at > timezone.now().time():
+            if ser_data.data['code'] == instance.code and instance.expire_at > current_time :
                 with transaction.atomic():
                     user=User.objects.create(**request.session['parent_register_info'])
                     user.phone_active=True
                     user.save()
                     instance.delete()
                     return Response('registered successfully',status=status.HTTP_201_CREATED)
+            elif instance.expire_at < current_time:
+                instance.delete()
+                return Response('time expired',status=status.HTTP_403_FORBIDDEN)
             else:
-                return Response('code is wrong',status=status.HTTP_403_FORBIDDEN)
-
+                return Response('code is wrong', status=status.HTTP_403_FORBIDDEN)
 
 
 

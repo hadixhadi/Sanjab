@@ -6,6 +6,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         model=User
         exclude=['is_active','is_admin','phone_active','password']
 
+
 class UserVerificationCodeSerializer(serializers.Serializer):
     code=serializers.IntegerField()
 class ChildRegisterSerializer(serializers.ModelSerializer):
