@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from accounts.models import User
 from rest_framework.permissions import AllowAny
-from accounts.utils import send_otp_code
+from accounts.tasks import send_otp_code
 from accounts.models import OtpCode
 # Create your views here.
 
@@ -20,7 +20,7 @@ class UserRegisterView(APIView):
                 request.session['parent_register_info']=request.data
                 otp_code=random.randint(1000,9999)
                 phone_number=request.POST['phone_number']
-                send_otp_code(phone_number=phone_number,otp_code=otp_code)
+                send_otp_code.delay(phone_number=phone_number,otp_code=otp_code)
                 otp_code_instance=OtpCode.objects.create(
                     phone_number=phone_number,
                     code=otp_code

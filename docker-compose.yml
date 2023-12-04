@@ -10,6 +10,7 @@ services:
       - "8000:8000"
     depends_on:
       - postgres
+      - rabbitmq
   postgres:
     image: public.ecr.aws/docker/library/postgres
     environment:
@@ -20,4 +21,12 @@ services:
       - ./pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+  rabbitmq:
+      image: public.ecr.aws/docker/library/rabbitmq:3.11.26-management
+      ports:
+        - "5672:5672"
+        - "15672:15672"
+      environment:
+        - "RABBITMQ_DEFAULT_USER=guest"
+        - "RABBITMQ_DEFAULT_PASS=guest"
 
