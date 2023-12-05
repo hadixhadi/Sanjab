@@ -1,3 +1,4 @@
+import json
 import random
 from django.db import transaction
 from accounts.serializers.front_serializer import *
@@ -7,8 +8,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from accounts.models import User
 from rest_framework.permissions import AllowAny
-from accounts.tasks import send_otp_code
+from accounts.tasks import send_otp_code , remove_otp_code
 from accounts.models import OtpCode
+from django_celery_beat.models import PeriodicTask , IntervalSchedule
 # Create your views here.
 
 class UserRegisterView(APIView):
@@ -27,6 +29,21 @@ class UserRegisterView(APIView):
                 )
                 otp_code_instance.set_expire_time()
                 otp_code_instance.save()
+                interval_instance=IntervalSchedule.objects.create(
+                            every=2,
+                            period=IntervalSchedule.MINUTES
+                        )
+                PeriodicTask.objects.create(
+                    name=f"remove otp code{otp_code_instance.id}",
+                    task="accounts.tasks.remove_otp_code",
+                    interval=interval_instance,
+                    one_off=True,
+                    kwargs=json.dumps({
+                        "id": otp_code_instance.id
+                    }),
+                    expire_seconds=120
+                )
+
                 return Response(ser_data.data,status=status.HTTP_100_CONTINUE)
         else:
             return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
@@ -34,23 +51,26 @@ class UserRegisterView(APIView):
 class UserVeryfication(APIView):
     permission_classes = [AllowAny]
     def post(self,request):
-        user_phone_number=request.session['parent_register_info']['phone_number']
-        instance=OtpCode.objects.get(phone_number=user_phone_number)
-        ser_data=UserVerificationCodeSerializer(data=request.data)
-        current_time=timezone.now().time()
-        if ser_data.is_valid():
-            if ser_data.data['code'] == instance.code and instance.expire_at > current_time :
-                with transaction.atomic():
-                    user=User.objects.create(**request.session['parent_register_info'])
-                    user.phone_active=True
-                    user.save()
+        try:
+            user_phone_number=request.session['parent_register_info']['phone_number']
+            instance=OtpCode.objects.get(phone_number=user_phone_number)
+            ser_data=UserVerificationCodeSerializer(data=request.data)
+            current_time=timezone.now().time()
+            if ser_data.is_valid():
+                if ser_data.data['code'] == instance.code and instance.expire_at > current_time :
+                    with transaction.atomic():
+                        user=User.objects.create(**request.session['parent_register_info'])
+                        user.phone_active=True
+                        user.save()
+                        instance.delete()
+                        return Response('registered successfully',status=status.HTTP_201_CREATED)
+                elif instance.expire_at < current_time:
                     instance.delete()
-                    return Response('registered successfully',status=status.HTTP_201_CREATED)
-            elif instance.expire_at < current_time:
-                instance.delete()
-                return Response('time expired',status=status.HTTP_403_FORBIDDEN)
-            else:
-                return Response('code is wrong', status=status.HTTP_403_FORBIDDEN)
+                    return Response('time expired',status=status.HTTP_403_FORBIDDEN)
+                else:
+                    return Response('code is wrong', status=status.HTTP_403_FORBIDDEN)
+        except:
+            return Response("try agin")
 
 
 

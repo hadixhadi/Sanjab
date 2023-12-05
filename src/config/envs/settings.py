@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-m$$4#@(87)6z0$vsg4e@15ql%t7j0)m(iv^e@&9ruhb4%!p@0c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0']
+ALLOWED_HOSTS = ['0.0.0.0','192.168.100.15']
 
 
 # Application definition
@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'accounts',
     "drf_spectacular",
-    # "corsheaders",
+    "corsheaders",
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [

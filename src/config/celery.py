@@ -7,3 +7,4 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 CELERY_TIMEZONE = "Asia/Tehran"
 app.conf.broker_url = 'amqp://rabbitmq'
+CELERY_RESULT_BACKEND = 'django-db'

@@ -72,7 +72,7 @@ class OtpCode(models.Model):
     created_time=models.DateTimeField(auto_now_add=True)
     expire_at=models.TimeField(null=True,blank=True)
     def set_expire_time(self):
-        self.expire_at=timezone.now() + timedelta(minutes=1)
+        self.expire_at=timezone.now() + timedelta(minutes=2)
         self.save()
     def __str__(self):
         return f"{self.phone_number} - {self.code} - {self.created_time}"

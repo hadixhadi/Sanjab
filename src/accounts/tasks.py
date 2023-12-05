@@ -1,5 +1,6 @@
 from kavenegar import KavenegarAPI, APIException, HTTPException
 from celery import shared_task
+from accounts.models import OtpCode
 @shared_task
 def send_otp_code(phone_number,otp_code):
     try:
@@ -15,3 +16,11 @@ def send_otp_code(phone_number,otp_code):
         print(e)
     except HTTPException as e:
         print(e)
+
+@shared_task
+def remove_otp_code(id):
+    try:
+        instance=OtpCode.objects.get(id=id)
+        instance.delete()
+    except:
+        pass
