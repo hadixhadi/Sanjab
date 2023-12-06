@@ -11,6 +11,13 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+  worker:
+    build: .
+    command: celery -A config worker --loglevel=info
+  beat:
+    build: .
+    command: celery -A config beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
   postgres:
     image: public.ecr.aws/docker/library/postgres
     environment:
@@ -29,4 +36,3 @@ services:
       environment:
         - "RABBITMQ_DEFAULT_USER=guest"
         - "RABBITMQ_DEFAULT_PASS=guest"
-

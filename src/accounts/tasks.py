@@ -8,7 +8,7 @@ def send_otp_code(phone_number,otp_code):
         params = {
             'sender': '100010008880',  # optional
             'receptor': f'{phone_number}',  # multiple mobile number, split by comma
-            'message': f' کد تایید شما:{otp_code}',
+            'message': f' کد تایید شما در سنجاب:{otp_code}',
         }
         response = api.sms_send(params)
         print(response)

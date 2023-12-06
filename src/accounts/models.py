@@ -31,6 +31,7 @@ class User(AbstractBaseUser):
     is_active=models.BooleanField(default=False)
     phone_active=models.BooleanField(default=False)
     is_admin=models.BooleanField(default=False)
+    postal_code=models.CharField(max_length=15,null=True,blank=True)
     USERNAME_FIELD='national_code'
     REQUIRED_FIELDS = ['phone_number','first_name','last_name']
     objects=CustomUserManager()

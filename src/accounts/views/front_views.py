@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from accounts.models import User
+from django.contrib.auth import get_user_model
 from rest_framework.permissions import AllowAny
 from accounts.tasks import send_otp_code , remove_otp_code
 from accounts.models import OtpCode
@@ -15,13 +16,18 @@ from django_celery_beat.models import PeriodicTask , IntervalSchedule
 
 class UserRegisterView(APIView):
     permission_classes = [AllowAny]
+    def get(self,request):
+        print("req get : ",request.GET)
     def post(self,request):
         ser_data=UserRegisterSerializer(data=request.data)
         if ser_data.is_valid():
             with transaction.atomic():
                 request.session['parent_register_info']=request.data
                 otp_code=random.randint(1000,9999)
-                phone_number=request.POST['phone_number']
+                print("*"*50)
+                print(request.POST)
+                print(ser_data.data['phone_number'])
+                phone_number=ser_data.data['phone_number']
                 send_otp_code.delay(phone_number=phone_number,otp_code=otp_code)
                 otp_code_instance=OtpCode.objects.create(
                     phone_number=phone_number,
@@ -44,11 +50,11 @@ class UserRegisterView(APIView):
                     expire_seconds=120
                 )
 
-                return Response(ser_data.data,status=status.HTTP_100_CONTINUE)
+                return Response("otp code has sent to your phone",status=status.HTTP_200_OK)
         else:
             return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
 
-class UserVeryfication(APIView):
+class UserPhoneVeryfication(APIView):
     permission_classes = [AllowAny]
     def post(self,request):
         try:
