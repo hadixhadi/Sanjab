@@ -1,8 +1,7 @@
 services:
   app:
     build: .
-    command: /bin/sh -c "python src/manage.py runserver 0.0.0.0:8000 && 
-              python src/manage.py makemigrations && python src/manage.py migrate"
+    command: /bin/sh -c " cd src/ && python manage.py migrate && gunicorn config.wsgi -b 0.0.0.0:8000"
     restart: always
     volumes:
       - .:/src
@@ -13,11 +12,16 @@ services:
       - rabbitmq
   worker:
     build: .
-    command: celery -A config worker --loglevel=info
+    command: sh -c "cd src/ && celery -A config worker --loglevel=info"
+    volumes:
+      - .:/src
+    depends_on:
+      - rabbitmq
   beat:
     build: .
-    command: celery -A config beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
-
+    command: sh -c  "cd src/ && celery -A config beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+    volumes:
+      - .:/src
   postgres:
     image: public.ecr.aws/docker/library/postgres
     environment:

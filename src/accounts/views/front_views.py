@@ -1,6 +1,10 @@
 import json
 import random
+import traceback
+
 from django.db import transaction
+from django.http import JsonResponse
+
 from accounts.serializers.front_serializer import *
 from rest_framework import viewsets
 from rest_framework.views import APIView
@@ -13,20 +17,16 @@ from accounts.tasks import send_otp_code , remove_otp_code
 from accounts.models import OtpCode
 from django_celery_beat.models import PeriodicTask , IntervalSchedule
 # Create your views here.
-
-class UserRegisterView(APIView):
+class UserSendOtpCode(APIView):
     permission_classes = [AllowAny]
     def get(self,request):
         print("req get : ",request.GET)
     def post(self,request):
-        ser_data=UserRegisterSerializer(data=request.data)
+        ser_data=RegisterOrLoginSrializer(data=request.data)
         if ser_data.is_valid():
             with transaction.atomic():
-                request.session['parent_register_info']=request.data
+                request.session['user_phone_number']=request.data
                 otp_code=random.randint(1000,9999)
-                print("*"*50)
-                print(request.POST)
-                print(ser_data.data['phone_number'])
                 phone_number=ser_data.data['phone_number']
                 send_otp_code.delay(phone_number=phone_number,otp_code=otp_code)
                 otp_code_instance=OtpCode.objects.create(
@@ -54,33 +54,44 @@ class UserRegisterView(APIView):
         else:
             return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
 
-class UserPhoneVeryfication(APIView):
+class UserOtpCodeVerification(APIView):
     permission_classes = [AllowAny]
     def post(self,request):
         try:
-            user_phone_number=request.session['parent_register_info']['phone_number']
+            user_phone_number=request.session['user_phone_number']['phone_number']
             instance=OtpCode.objects.get(phone_number=user_phone_number)
             ser_data=UserVerificationCodeSerializer(data=request.data)
             current_time=timezone.now().time()
             if ser_data.is_valid():
                 if ser_data.data['code'] == instance.code and instance.expire_at > current_time :
-                    with transaction.atomic():
-                        user=User.objects.create(**request.session['parent_register_info'])
-                        user.phone_active=True
-                        user.save()
-                        instance.delete()
-                        return Response('registered successfully',status=status.HTTP_201_CREATED)
+                    if User.objects.filter(phone_number=user_phone_number).exists():
+                        return JsonResponse({
+                            "is_registered":True
+                        })
+                    else:
+                        return JsonResponse({
+                            "is_registered": False
+                        })
+                    instance.delete()
                 elif instance.expire_at < current_time:
                     instance.delete()
                     return Response('time expired',status=status.HTTP_403_FORBIDDEN)
                 else:
                     return Response('code is wrong', status=status.HTTP_403_FORBIDDEN)
-        except:
-            return Response("try agin")
+        except Exception:
+            return Response(traceback.format_exc())
 
 
-
-
+class UserRegisterationView(APIView):
+    def post(self,request):
+        ser_data=UserRegisterSerializer(data=request.data)
+        if ser_data.is_valid():
+            with transaction.atomic():
+                user=ser_data.save()
+                user.phone_active=True
+                user.phone_number=request.session['user_phone_number']['phone_number']
+                user.save()
+                return Response('registered successfully',status=status.HTTP_201_CREATED)
 
 class ChildRegisterView(APIView):
     def post(self,request):

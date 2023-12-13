@@ -1,4 +1,4 @@
-FROM python:3.10.6
+FROM public.ecr.aws/docker/library/python:slim-bullseye
 LABEL authors="hadi"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -9,4 +9,4 @@ COPY ./src /src
 EXPOSE 8000
 
 RUN pip install -r /requirments/requrments.txt
-CMD python src/manage.py migrate
+CMD ["gunicorn","config.wsgi",":8000"]
