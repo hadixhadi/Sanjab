@@ -17,7 +17,7 @@ class CustomUserManager(BaseUserManager):
                         last_name=last_name,
                         national_code=national_code,
                         phone_number=phone_number)
-        user.set_password(phone_number)
+        user.set_password(national_code)
         user.save(using=self._db)
         return user 
     def create_superuser(self,first_name,last_name,

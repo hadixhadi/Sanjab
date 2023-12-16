@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'accounts',
     "drf_spectacular",
     "corsheaders",
-    'django_celery_beat'
+    'django_celery_beat',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [

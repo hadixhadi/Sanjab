@@ -13,7 +13,7 @@ class User(AbstractBaseUser):
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     national_code=models.CharField(max_length=10,unique=True,primary_key=True)
-    phone_number=models.CharField(max_length=11,unique=True)
+    phone_number=models.CharField(max_length=11,unique=True,null=True,blank=True)
 
 
     type=models.SmallIntegerField(choices=TYPE,null=True,blank=True)
@@ -32,8 +32,8 @@ class User(AbstractBaseUser):
     phone_active=models.BooleanField(default=False)
     is_admin=models.BooleanField(default=False)
     postal_code=models.CharField(max_length=15,null=True,blank=True)
-    USERNAME_FIELD='national_code'
-    REQUIRED_FIELDS = ['phone_number','first_name','last_name']
+    USERNAME_FIELD='phone_number'
+    REQUIRED_FIELDS = ['national_code','first_name','last_name']
     objects=CustomUserManager()
 
     def __str__(self):
@@ -67,7 +67,7 @@ class ChildUser(models.Model):
     mother=models.ForeignKey(User,on_delete=models.CASCADE
                              ,related_name="mother_child")
 
-class OtpCode(models.Model):
+class   OtpCode(models.Model):
     phone_number=models.CharField(max_length=11)
     code=models.PositiveSmallIntegerField()
     created_time=models.DateTimeField(auto_now_add=True)
