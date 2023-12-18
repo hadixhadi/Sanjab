@@ -37,7 +37,7 @@ class User(AbstractBaseUser):
     objects=CustomUserManager()
 
     def __str__(self):
-        return self.national_code
+        return f"{self.first_name} - {self.last_name} - {self.national_code}"
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
@@ -63,12 +63,12 @@ class ChildUser(models.Model):
     grade=models.CharField(max_length=50)
     school_address=models.CharField(max_length=100)
     father=models.ForeignKey(User,on_delete=models.CASCADE
-                             ,related_name="father_child")
+                             ,related_name="father_child",null=True,blank=True)
     mother=models.ForeignKey(User,on_delete=models.CASCADE
-                             ,related_name="mother_child")
+                             ,related_name="mother_child",null=True,blank=True)
 
-class   OtpCode(models.Model):
-    phone_number=models.CharField(max_length=11)
+class OtpCode(models.Model):
+    phone_number=models.CharField(max_length=11,unique=True)
     code=models.PositiveSmallIntegerField()
     created_time=models.DateTimeField(auto_now_add=True)
     expire_at=models.TimeField(null=True,blank=True)

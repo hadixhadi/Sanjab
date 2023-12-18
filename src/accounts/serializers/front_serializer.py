@@ -1,5 +1,6 @@
 from accounts.models import *
 from rest_framework import serializers
+from courses.models import UserCourse
 
 class RegisterOrLoginSrializer(serializers.Serializer):
     phone_number=serializers.CharField()
@@ -16,14 +17,5 @@ class ChildRegisterSerializer(serializers.ModelSerializer):
         model=ChildUser
         fields='__all__'
 
-class UserDashboardSerializer(serializers.ModelSerializer):
-    children=serializers.SerializerMethodField()
 
-    def get_children(self,obj):
-        childs=obj.father_child.all()
-        ser_data=ChildRegisterSerializer(childs,many=True)
-        return ser_data.data
-    class Meta:
-        model=User
-        exclude=['password','is_active','phone_active','is_admin']
 

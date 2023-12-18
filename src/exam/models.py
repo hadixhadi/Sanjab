@@ -1,21 +1,19 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
-class Type(models.Model):
-    choices=models.CharField(max_length=200)
-
-    def __str__(self):
-        return f"{self.choices}"
 class Exam(models.Model):
+    TYPE=[
+        (1,'4-7'),
+        (2,'8-11'),
+        (3,'12-15')
+    ]
+    type=models.SmallIntegerField(choices=TYPE)
     subject=models.CharField(max_length=200)
-    sluge=models.SlugField()
-    type=models.ForeignKey(Type,on_delete=models.PROTECT)
     def __str__(self):
         return f"{self.subject}"
 class Question(models.Model):
-    exam=models.ForeignKey(Exam,on_delete=models.CASCADE)
+    exam=models.ForeignKey(Exam,on_delete=models.CASCADE,related_name="questions")
     question=models.CharField(max_length=400)
-    user_answer=models.SmallIntegerField(null=True,blank=True)
     def __str__(self):
         return f"{self.question}"
 
