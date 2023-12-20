@@ -42,3 +42,9 @@ class UserCourse(models.Model):
     expire_at=models.DateTimeField()
     def __str__(self):
         return f"{self.user} - {self.course}"
+
+class ModuleSchedule(models.Model):
+    user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name="user_module")
+    module=models.ForeignKey(Module,on_delete=models.CASCADE,related_name="module_schedule")
+    course=models.ForeignKey(Course,on_delete=models.CASCADE,related_name="course_module_schedule")
+    active_at=models.DateTimeField()

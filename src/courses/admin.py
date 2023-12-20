@@ -5,3 +5,6 @@ admin.site.register(Course)
 admin.site.register(Content)
 admin.site.register(Module)
 admin.site.register(UserCourse)
+@admin.register(ModuleSchedule)
+class ModuleScheduleAdmin(admin.ModelAdmin):
+    list_display = ['user','course','module','active_at']

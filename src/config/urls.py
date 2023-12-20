@@ -24,7 +24,7 @@ urlpatterns = [
     path('api/v1/exam/front/',include('exam.urls.front_urls')),
     path('api/v1/account/',include('accounts.urls.front_urls')),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/v1/course/",include('courses.urls.front_urls')),
+    path("api/v1/courses/",include('courses.urls.front_urls')),
     path("api/v1/dashboard/",include('dashboard.urls.front_urls')),
     path("api/schema/swagger-ui/", SpectacularSwaggerView.as_view(
 url_name="schema"), name="swagger-ui"),

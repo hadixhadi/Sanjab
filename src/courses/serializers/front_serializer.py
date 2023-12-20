@@ -28,5 +28,9 @@ class UserCourseModelSerializer(serializers.ModelSerializer):
     course=CourseModelSerializer()
     class Meta:
         model=UserCourse
-        fields='__all__'
+        exclude=('user',)
+
+class CreateUserCourseSerializer(serializers.Serializer):
+    course=serializers.IntegerField()
+
 
