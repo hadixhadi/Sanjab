@@ -22,8 +22,12 @@ class EntryDashboardView(views.APIView):
 
 class UserCoursesView(views.APIView):
     def get(self,request):
-        child=ChildUser.objects.get(national_code=request.session['current_user_child'])
-        obj=UserCourse.objects.filter(Q(user=request.user)& Q(child=child))
+        child = None
+        if request.session['current_user_child'] != None:
+            child=ChildUser.objects.get(national_code=request.session['current_user_child'])
+            obj=UserCourse.objects.filter(Q(user=request.user)& Q(child=child))
+        else:
+            obj = UserCourse.objects.filter(Q(user=request.user)& Q(child=None))
         ser_data=UserCourseModelSerializer(instance=obj,many=True)
         return Response(ser_data.data)
 

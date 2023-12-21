@@ -12,9 +12,6 @@ from accounts.models import ChildUser
 
 class CourseView(views.APIView):
     def get(self,request):
-        print(request.user.father_child)
-        child_user= request.user.father_child.id
-
         courses=Course.objects.all()
         ser_data=CourseModelSerializer(instance=courses,many=True)
         return Response(ser_data.data)
