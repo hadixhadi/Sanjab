@@ -9,7 +9,8 @@ class Course(models.Model):
     TYPE=[
         (1,'4-7'),
         (2,'8-11'),
-        (3,'12-15')
+        (3,'12-15'),
+        (4,'PARENT')
     ]
     name=models.CharField(max_length=100)
     description=models.TextField()

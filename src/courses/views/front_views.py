@@ -12,7 +12,12 @@ from accounts.models import ChildUser
 
 class CourseView(views.APIView):
     def get(self,request):
-        courses=Course.objects.all()
+        if request.session['current_user_child'] == None:
+            courses=Course.objects.filter(type=4)
+        else:
+            child_national_code=request.session['current_user_child']
+            child=ChildUser.objects.get(national_code=child_national_code)
+            courses=Course.objects.filter(type=child.type)
         ser_data=CourseModelSerializer(instance=courses,many=True)
         return Response(ser_data.data)
 
@@ -27,12 +32,16 @@ class CreateUserCourseView(views.APIView):
                 course=Course.objects.get(pk=course_id)
                 if request.session['current_user_child'] != None:
                     child_user=ChildUser.objects.get(national_code=request.session['current_user_child'])
-                    user_course = UserCourse.objects.create(
-                        user=user,
-                        course=course,
-                        child=child_user,
-                        expire_at=datetime.now() + timedelta(days=90)
-                    )
+                    if course.type == child_user.type :
+                        user_course = UserCourse.objects.create(
+                            user=user,
+                            course=course,
+                            child=child_user,
+                            expire_at=datetime.now() + timedelta(days=90)
+                        )
+                    else:
+                        return Response("your type is not equal with course type",
+                                        status=status.HTTP_403_FORBIDDEN)
                 else:
                     user_course=UserCourse.objects.create(
                         user=user,

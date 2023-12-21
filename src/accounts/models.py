@@ -56,16 +56,20 @@ class User(AbstractBaseUser):
         return self.is_admin
 
 class ChildUser(models.Model):
+    TYPE = [
+        (1, '4-7'),
+        (2, '8-11'),
+        (3, '12-15'),
+    ]
     first_name=models.CharField(max_length=100)
     last_name=models.CharField(max_length=100)
     national_code=models.CharField(max_length=100,primary_key=True)
     birth_date=models.DateField(null=True,blank=True)
     grade=models.CharField(max_length=50)
     school_address=models.CharField(max_length=100)
-    father=models.ForeignKey(User,on_delete=models.CASCADE
+    parent=models.ForeignKey(User,on_delete=models.CASCADE
                              ,related_name="father_child",null=True,blank=True)
-    mother=models.ForeignKey(User,on_delete=models.CASCADE
-                             ,related_name="mother_child",null=True,blank=True)
+    type=models.SmallIntegerField(choices=TYPE)
 
 class OtpCode(models.Model):
     phone_number=models.CharField(max_length=11,unique=True)

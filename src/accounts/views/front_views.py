@@ -120,10 +120,14 @@ class UserRegisterationView(APIView):
 class ChildRegisterView(APIView):
     permission_classes = [IsAuthenticated]
     throttle_scope='user_register_views'
+
     def post(self,request):
+        print(request.user)
         ser_data=ChildRegisterSerializer(data=request.data)
         if ser_data.is_valid():
-            ser_data.save()
+            child_obj=ChildUser.objects.create(**ser_data.validated_data)
+            child_obj.parent=request.user
+            child_obj.save()
             return Response(ser_data.data,status=status.HTTP_201_CREATED)
         else:
             return Response(ser_data.errors)
