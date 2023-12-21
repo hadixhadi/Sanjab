@@ -34,3 +34,8 @@ class CreateUserCourseSerializer(serializers.Serializer):
     course=serializers.IntegerField()
 
 
+class ModuleScheduleSerializer(serializers.ModelSerializer):
+    module=ModuleModelSerializer()
+    class Meta:
+        model=ModuleSchedule
+        fields='__all__'

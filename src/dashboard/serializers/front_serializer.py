@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.models import User
+from accounts.models import User , ChildUser
 from accounts.serializers.front_serializer import ChildRegisterSerializer
 
 
@@ -12,3 +12,9 @@ class EntryDashboardSerializer(serializers.ModelSerializer):
         childes=obj.father_child.all()
         ser_data=ChildRegisterSerializer(childes,many=True)
         return ser_data.data
+
+# class ChildDashboardSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model=ChildUser
+#         fields='__all__'

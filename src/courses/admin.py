@@ -7,4 +7,4 @@ admin.site.register(Module)
 admin.site.register(UserCourse)
 @admin.register(ModuleSchedule)
 class ModuleScheduleAdmin(admin.ModelAdmin):
-    list_display = ['user','course','module','active_at']
+    list_display = ['user_course','child','module','active_at']

@@ -2,6 +2,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
+from accounts.models import ChildUser
 # Create your models here.
 
 class Course(models.Model):
@@ -39,12 +40,17 @@ class UserCourse(models.Model):
     user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name="user_courses")
     course=models.ForeignKey(Course,on_delete=models.PROTECT)
     created_at=models.DateTimeField(auto_now_add=True)
+    child = models.ForeignKey(ChildUser, on_delete=models.CASCADE,
+                              related_name="child_user_course", null=True, blank=True)
     expire_at=models.DateTimeField()
     def __str__(self):
         return f"{self.user} - {self.course}"
 
 class ModuleSchedule(models.Model):
-    user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name="user_module")
-    module=models.ForeignKey(Module,on_delete=models.CASCADE,related_name="module_schedule")
-    course=models.ForeignKey(Course,on_delete=models.CASCADE,related_name="course_module_schedule")
+    user_course=models.ForeignKey(UserCourse,on_delete=models.CASCADE,
+                                  related_name="user_course_moduleschedule")
+    module=models.ForeignKey(Module,on_delete=models.CASCADE,
+                             related_name="module_schedule")
+    child=models.ForeignKey(ChildUser,on_delete=models.CASCADE,
+                            related_name="child_module_schedule",null=True,blank=True)
     active_at=models.DateTimeField()
