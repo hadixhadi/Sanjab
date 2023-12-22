@@ -21,20 +21,21 @@ class Course(models.Model):
         return self.name
 class Module(models.Model):
     name=models.CharField(max_length=200)
-    course=models.ForeignKey(Course,on_delete=models.CASCADE,related_name="module")
+    course=models.ForeignKey(Course,on_delete=models.CASCADE,related_name="module_rel")
 
     def __str__(self):
         return self.name
 
 class Content(models.Model):
-    module=models.ForeignKey(Module,on_delete=models.CASCADE,related_name="content")
+    module=models.ForeignKey(Module,on_delete=models.CASCADE,related_name="content_rel")
     name=models.CharField(max_length=200)
 
     content_type = models.ForeignKey(ContentType,
                                      on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     item = GenericForeignKey('content_type', 'object_id')
-
+    is_active=models.BooleanField(default=False,null=True,blank=True)
+    age=models.SmallIntegerField()
     def __str__(self):
         return self.name
 class UserCourse(models.Model):

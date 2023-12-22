@@ -13,7 +13,7 @@ class ModuleModelSerializer(serializers.ModelSerializer):
         model=Module
         exclude=('course',)
     def get_content(self,obj):
-        contents=obj.content.all()
+        contents=obj.content_rel.all()
         return ContentModelSerializer(instance=contents,many=True).data
 class CourseModelSerializer(serializers.ModelSerializer):
     module=serializers.SerializerMethodField()
@@ -21,7 +21,7 @@ class CourseModelSerializer(serializers.ModelSerializer):
         model=Course
         fields='__all__'
     def get_module(self,obj):
-        module=obj.module.all()
+        module=obj.module_rel.all()
         return ModuleModelSerializer(instance=module,many=True).data
 
 class UserCourseModelSerializer(serializers.ModelSerializer):

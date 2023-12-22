@@ -2,11 +2,14 @@ from rest_framework import views, status
 from dashboard.serializers.front_serializer import *
 from rest_framework.response import Response
 from courses.models import UserCourse , ModuleSchedule , Course
-from courses.serializers.front_serializer import UserCourseModelSerializer , ModuleScheduleSerializer
+from courses.serializers.front_serializer import (UserCourseModelSerializer ,
+    ModuleScheduleSerializer , ContentModelSerializer
+                                                  )
 from django.db.models import Q
 from datetime import datetime
 from accounts.models import ChildUser
 from accounts.serializers.front_serializer import ChildRegisterSerializer
+import pytz
 from courses.serializers.front_serializer import ModuleModelSerializer
 # Create your views here.
 
@@ -57,4 +60,21 @@ class ChangeChildUserView(views.APIView):
         print(f"current user : {request.session['current_user']}")
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
-
+class ShowCourseContentsView(views.APIView):
+    def get(self,request,course_id):
+            if request.session['current_user_child'] == None:
+                user_course_obj=UserCourse.objects.get(Q(user=request.user) & Q(id=course_id))
+            else:
+                try:
+                    user=ChildUser.objects.get(national_code=request.session['current_user_child'])
+                    user_course_obj = UserCourse.objects.get(Q(child=user) & Q(id=course_id))
+                except:
+                    return Response("there is not registered course ",status=status.HTTP_200_OK)
+            course=user_course_obj.course
+            module=course.module_rel.first()
+            age=datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
+            contents=module.content_rel.filter(
+                age__lte=age.days
+            )
+            ser_data=ContentModelSerializer(instance=contents,many=True)
+            return Response(ser_data.data,status=status.HTTP_200_OK)

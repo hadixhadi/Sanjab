@@ -1,8 +1,5 @@
 from django.db import transaction
-
-from courses.models import *
 from rest_framework import views, status
-from rest_framework.permissions import AllowAny
 from courses.serializers.front_serializer import *
 from rest_framework.response import Response
 from datetime import datetime , timedelta
@@ -37,19 +34,21 @@ class CreateUserCourseView(views.APIView):
                             user=user,
                             course=course,
                             child=child_user,
-                            expire_at=datetime.now() + timedelta(days=90)
+                            expire_at=datetime.now() + timedelta(days=61)
                         )
                     else:
                         return Response("your type is not equal with course type",
                                         status=status.HTTP_403_FORBIDDEN)
-                else:
+                elif request.user.type in [1,2]:
                     user_course=UserCourse.objects.create(
                         user=user,
                         course=course,
-                        expire_at=datetime.now() + timedelta(days=90)
+                        expire_at=datetime.now() + timedelta(days=61)
                     )
-
-                modules=course.module.all()
+                else:
+                    return Response("your type is not equal with course type",
+                                    status=status.HTTP_403_FORBIDDEN)
+                modules=course.module_rel.all()
                 active_at = datetime.now()
                 for module in modules:
                     ModuleSchedule.objects.create(
@@ -58,8 +57,7 @@ class CreateUserCourseView(views.APIView):
                         active_at=active_at,
 
                     )
-                    active_at = datetime.now() + timedelta(days=20)
-
+                    active_at = datetime.now() + timedelta(days=90)
                 user_course.save()
                 return Response("course created successfully " , status=status.HTTP_201_CREATED)
         else:
