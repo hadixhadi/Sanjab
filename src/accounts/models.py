@@ -6,8 +6,7 @@ from accounts.manager import CustomUserManager
 # Create your models here.
 class User(AbstractBaseUser):
     TYPE=[
-        (1,'FATHER'),
-        (2,'MOTHER')
+        (1,'PARENT'),
     ]
     #required fields
     first_name = models.CharField(max_length=200)
