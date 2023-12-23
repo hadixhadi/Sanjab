@@ -1,13 +1,16 @@
 services:
   app:
     build: .
-    command: /bin/sh -c " cd src/ && python manage.py migrate && python manage.py runserver 0.0.0.0:8000 "
-#    command: /bin/sh -c " cd src/ && python manage.py migrate && gunicorn config.wsgi -b 0.0.0.0:8000"
+#    command: /bin/sh -c " cd src/ && python manage.py migrate && python manage.py runserver 0.0.0.0:8000 "
+    command: /bin/sh -c " cd src/ && python manage.py migrate && gunicorn config.wsgi -b 0.0.0.0:8000"
+    container_name: app
     restart: always
     volumes:
       - .:/src
     ports:
       - "8000:8000"
+    networks:
+      - main
     depends_on:
       - postgres
       - rabbitmq
@@ -18,11 +21,17 @@ services:
       - .:/src
     depends_on:
       - rabbitmq
+    networks:
+      - main
+    restart: always
   beat:
     build: .
     command: sh -c  "cd src/ && celery -A config beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
     volumes:
       - .:/src
+    networks:
+      - main
+    restart: always
   postgres:
     image: public.ecr.aws/docker/library/postgres
     environment:
@@ -33,11 +42,33 @@ services:
       - ./pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - main
+    restart: always
   rabbitmq:
       image: public.ecr.aws/docker/library/rabbitmq:3.11.26-management
       ports:
         - "5672:5672"
         - "15672:15672"
+      networks:
+        - main
+      restart: always
       environment:
         - "RABBITMQ_DEFAULT_USER=guest"
         - "RABBITMQ_DEFAULT_PASS=guest"
+  nginx:
+    container_name: nginx
+    command: nginx -g 'daemon off;'
+    image: nginx:latest
+    depends_on:
+      - app
+    networks:
+      - main
+    ports:
+      - "80:80"
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./src/config/static/:/media/
+networks:
+  main:
