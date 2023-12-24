@@ -59,7 +59,7 @@ services:
   nginx:
     container_name: nginx
     command: nginx -g 'daemon off;'
-    image: nginx:latest
+    image: public.ecr.aws/nginx/nginx:stable-perl
     depends_on:
       - app
     networks:
