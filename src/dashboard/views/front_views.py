@@ -14,6 +14,9 @@ from courses.serializers.front_serializer import ModuleModelSerializer
 # Create your views here.
 
 class EntryDashboardView(views.APIView):
+    """
+     when user registered successfully redirects to this class
+    """
     def get(self,request):
         request.session['current_user']=request.user.national_code
         request.session['current_user_child']=None
@@ -24,8 +27,16 @@ class EntryDashboardView(views.APIView):
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
 class UserCoursesView(views.APIView):
+    """
+    show courses that user already registered
+    """
     def get(self,request):
-        child = None
+        """
+        this means user entered in dashboard as child user
+        `request.session['current_user_child'] != None:`
+        :param request:
+        :return: serialize data of UserCourse model
+        """
         if request.session['current_user_child'] != None:
             child=ChildUser.objects.get(national_code=request.session['current_user_child'])
             obj=UserCourse.objects.filter(Q(user=request.user)& Q(child=child))
@@ -51,7 +62,17 @@ class UserCourseModules(views.APIView):
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
 class ChangeChildUserView(views.APIView):
+    """
+    user can enter in dashboard as his/her child user
+    """
     def get(self,request,national_code):
+        """
+        get child national_code and fetch child user form database
+        then child object sets as current user in session
+        :param request:
+        :param national_code: child national code
+        :return: child user information
+        """
         child=ChildUser.objects.get(national_code=national_code)
         ser_data=ChildRegisterSerializer(instance=child)
         request.session['current_user_child']=national_code
@@ -61,20 +82,30 @@ class ChangeChildUserView(views.APIView):
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
 class ShowCourseContentsView(views.APIView):
+    """
+    user can check contents of course that already registered
+    """
     def get(self,request,course_id):
-            if request.session['current_user_child'] == None:
-                user_course_obj=UserCourse.objects.get(Q(user=request.user) & Q(id=course_id))
-            else:
-                try:
-                    user=ChildUser.objects.get(national_code=request.session['current_user_child'])
-                    user_course_obj = UserCourse.objects.get(Q(child=user) & Q(id=course_id))
-                except:
-                    return Response("there is not registered course ",status=status.HTTP_200_OK)
-            course=user_course_obj.course
-            module=course.module_rel.first()
-            age=datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
-            contents=module.content_rel.filter(
-                age__lte=age.days
-            )
-            ser_data=ContentModelSerializer(instance=contents,many=True)
-            return Response(ser_data.data,status=status.HTTP_200_OK)
+        """
+        this means user entered in dashboard as parent user:
+        `request.session['current_user_child'] == None:`
+        :param request:
+        :param course_id: id of course that user can check
+        :return:
+        """
+        if request.session['current_user_child'] == None:
+            user_course_obj=UserCourse.objects.get(Q(user=request.user) & Q(id=course_id))
+        else:
+            try:
+                user=ChildUser.objects.get(national_code=request.session['current_user_child'])
+                user_course_obj = UserCourse.objects.get(Q(child=user) & Q(id=course_id))
+            except:
+                return Response("there is not registered course ",status=status.HTTP_200_OK)
+        course=user_course_obj.course
+        module=course.module_rel.first()
+        age=datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
+        contents=module.content_rel.filter(
+            age__lte=age.days
+        )
+        ser_data=ContentModelSerializer(instance=contents,many=True)
+        return Response(ser_data.data,status=status.HTTP_200_OK)

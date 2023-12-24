@@ -17,10 +17,14 @@ from django_celery_beat.models import PeriodicTask , IntervalSchedule
 from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 class UserSendOtpCode(APIView):
+    """
+    get phone number with POST method and store it in sessions
+    then create an OtpCode instance in database and create a PeriodTask instance for
+    remove created OtpCode instance in database if user does not send any code
+    """
     permission_classes = [AllowAny]
     throttle_scope='enter_phone_number'
-    def get(self,request):
-        print("req get : ",request.GET)
+
     def post(self,request):
         ser_data=RegisterOrLoginSrializer(data=request.data)
         if ser_data.is_valid():
@@ -50,11 +54,18 @@ class UserSendOtpCode(APIView):
                     expire_seconds=120
                 )
 
-                return Response("otp code has sent to your phone",status=status.HTTP_200_OK)
+                return Response(request.session.session_key,status=status.HTTP_200_OK)
         else:
             return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class UserOtpCodeVerification(APIView):
+    """
+    retrieve phone number that user send in `UserSendOtpCode` from session
+    and compare that with OtpCode instance
+    if user already registered method  returns a JWTtoken
+    and if user not registered it returns False
+    otherwise it returns aporopiat error
+    """
     permission_classes = [AllowAny]
     throttle_scope='otp_verification_views'
     def post(self,request):
@@ -63,7 +74,9 @@ class UserOtpCodeVerification(APIView):
             instance=OtpCode.objects.get(phone_number=user_phone_number)
             ser_data=UserVerificationCodeSerializer(data=request.data)
             current_time=timezone.now().time()
+            print("قبل از سریالایزر")
             if ser_data.is_valid():
+                print("کد به درستی وارد شده")
                 if ser_data.data['code'] == instance.code and instance.expire_at > current_time :
                     try:
                         user=get_object_or_404(User,phone_number=user_phone_number)
@@ -90,6 +103,10 @@ class UserOtpCodeVerification(APIView):
 
 
 class UserRegisterationView(APIView):
+    """
+    user fill the parent form and if everything was ok
+    returns JWTtoken and save data in database
+    """
     permission_classes = [AllowAny]
     throttle_scope='user_register_views'
     def post(self,request):
@@ -118,6 +135,10 @@ class UserRegisterationView(APIView):
             },status=400)
 
 class ChildRegisterView(APIView):
+    """
+    user fill child register form and if everything was ok
+    return serializer data
+    """
     permission_classes = [IsAuthenticated]
     throttle_scope='user_register_views'
 
