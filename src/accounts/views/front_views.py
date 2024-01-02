@@ -15,6 +15,7 @@ from accounts.tasks import send_otp_code
 from accounts.models import OtpCode
 from django_celery_beat.models import PeriodicTask , IntervalSchedule
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.sessions.backends.db import SessionStore
 # Create your views here.
 class UserSendOtpCode(APIView):
     """
@@ -53,7 +54,7 @@ class UserSendOtpCode(APIView):
                     }),
                     expire_seconds=120
                 )
-
+                request.session.save()
                 return Response(request.session.session_key,status=status.HTTP_200_OK)
         else:
             return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
@@ -70,13 +71,14 @@ class UserOtpCodeVerification(APIView):
     throttle_scope='otp_verification_views'
     def post(self,request):
         try:
-            user_phone_number=request.session['user_phone_number']['phone_number']
+            session_id=request.GET.get('session')
+            session=SessionStore(session_key=session_id)
+            user_phone=session['user_phone_number']
+            user_phone_number=user_phone['phone_number']
             instance=OtpCode.objects.get(phone_number=user_phone_number)
             ser_data=UserVerificationCodeSerializer(data=request.data)
             current_time=timezone.now().time()
-            print("قبل از سریالایزر")
             if ser_data.is_valid():
-                print("کد به درستی وارد شده")
                 if ser_data.data['code'] == instance.code and instance.expire_at > current_time :
                     try:
                         user=get_object_or_404(User,phone_number=user_phone_number)
@@ -117,7 +119,11 @@ class UserRegisterationView(APIView):
                     user=ser_data.save()
                     user.phone_active=True
                     user.is_active=True
-                    user.phone_number=request.session['user_phone_number']['phone_number']
+                    session_id = request.GET.get('session')
+                    session = SessionStore(session_key=session_id)
+                    user_phone = session['user_phone_number']
+                    user_phone_number=user_phone['phone_number']
+                    user.phone_number=user_phone_number
                     user.save()
                     refresh = RefreshToken.for_user(user)
                     token_response={
@@ -127,7 +133,7 @@ class UserRegisterationView(APIView):
                     return Response(token_response,status=status.HTTP_201_CREATED)
                     # return Response('registered successfully',status=status.HTTP_201_CREATED)
             else:
-                return Response(ser_data.errors)
+                return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             error_message=str(e)
             return JsonResponse({
@@ -141,9 +147,12 @@ class ChildRegisterView(APIView):
     """
     permission_classes = [IsAuthenticated]
     throttle_scope='user_register_views'
-
+    def get(self,request):
+        children=ChildUser.objects.filter(parent=request.user)
+        ser_data=ChildRegisterSerializer(instance=children,many=True)
+        return Response(ser_data.data,status=status.HTTP_200_OK)
     def post(self,request):
-        print(request.user)
+        print("requested user for child register : ",request.user)
         ser_data=ChildRegisterSerializer(data=request.data)
         if ser_data.is_valid():
             child_obj=ChildUser.objects.create(**ser_data.validated_data)
@@ -151,15 +160,15 @@ class ChildRegisterView(APIView):
             child_obj.save()
             return Response(ser_data.data,status=status.HTTP_201_CREATED)
         else:
-            return Response(ser_data.errors)
+            return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 
 
-class UserAdminDashboard(viewsets.ModelViewSet):
-
-    def get_queryset(self):
-        return User.objects.filter(national_code=self.request.user.national_code)
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return UserDashboardSerializer
+# class UserAdminDashboard(viewsets.ModelViewSet):
+#
+#     def get_queryset(self):
+#         return User.objects.filter(national_code=self.request.user.national_code)
+#     def get_serializer_class(self):
+#         if self.action == 'list':
+#             return UserDashboardSerializer

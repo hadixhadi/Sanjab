@@ -10,18 +10,22 @@ from datetime import datetime
 from accounts.models import ChildUser
 from accounts.serializers.front_serializer import ChildRegisterSerializer
 import pytz
+from django.contrib.sessions.backends.db import SessionStore
 from courses.serializers.front_serializer import ModuleModelSerializer
 # Create your views here.
 
+# TODO: 1-extract method for session
 class EntryDashboardView(views.APIView):
     """
      when user registered successfully redirects to this class
     """
     def get(self,request):
-        request.session['current_user']=request.user.national_code
-        request.session['current_user_child']=None
-        print(f"current user : {request.session['current_user']}")
-        print(f"current child : {request.session['current_user_child']}")
+        session_id=request.GET.get('session')
+        session=SessionStore(session_key=session_id)
+        session['current_user']=request.user.national_code
+        session['current_user_child']=None
+        print(f"current user : {session['current_user']}")
+        print(f"current child : {session['current_user_child']}")
         instance=User.objects.get(national_code=request.user.national_code)
         ser_data=EntryDashboardSerializer(instance=instance)
         return Response(ser_data.data,status=status.HTTP_200_OK)
@@ -34,11 +38,13 @@ class UserCoursesView(views.APIView):
         """
         this means user entered in dashboard as child user
         `request.session['current_user_child'] != None:`
-        :param request:
+        :param request: session_id
         :return: serialize data of UserCourse model
         """
-        if request.session['current_user_child'] != None:
-            child=ChildUser.objects.get(national_code=request.session['current_user_child'])
+        session_id=request.GET.get("session")
+        session=SessionStore(session_key=session_id)
+        if session['current_user_child'] != None:
+            child=ChildUser.objects.get(national_code=session['current_user_child'])
             obj=UserCourse.objects.filter(Q(user=request.user)& Q(child=child))
         else:
             obj = UserCourse.objects.filter(Q(user=request.user)& Q(child=None))
@@ -69,16 +75,18 @@ class ChangeChildUserView(views.APIView):
         """
         get child national_code and fetch child user form database
         then child object sets as current user in session
-        :param request:
+        :param request: session_id
         :param national_code: child national code
         :return: child user information
         """
+        session_id=request.GET.get('session')
+        session=SessionStore(session_key=session_id)
         child=ChildUser.objects.get(national_code=national_code)
         ser_data=ChildRegisterSerializer(instance=child)
-        request.session['current_user_child']=national_code
-        request.session['current_user']=national_code
-        print(f" current child user : {request.session['current_user_child']}")
-        print(f"current user : {request.session['current_user']}")
+        session['current_user_child']=national_code
+        session['current_user']=national_code
+        print(f" current child user : {session['current_user_child']}")
+        print(f"current user : {session['current_user']}")
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
 class ShowCourseContentsView(views.APIView):
@@ -93,11 +101,13 @@ class ShowCourseContentsView(views.APIView):
         :param course_id: id of course that user can check
         :return:
         """
-        if request.session['current_user_child'] == None:
+        session_id = request.GET.get('session')
+        session = SessionStore(session_key=session_id)
+        if session['current_user_child'] == None:
             user_course_obj=UserCourse.objects.get(Q(user=request.user) & Q(id=course_id))
         else:
             try:
-                user=ChildUser.objects.get(national_code=request.session['current_user_child'])
+                user=ChildUser.objects.get(national_code=session['current_user_child'])
                 user_course_obj = UserCourse.objects.get(Q(child=user) & Q(id=course_id))
             except:
                 return Response("there is not registered course ",status=status.HTTP_200_OK)

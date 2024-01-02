@@ -5,14 +5,17 @@ from rest_framework.response import Response
 from datetime import datetime , timedelta
 from rest_framework.permissions import IsAuthenticated
 from accounts.models import ChildUser
+from django.contrib.sessions.backends.db import SessionStore
 # Create your views here.
 
 class CourseView(views.APIView):
     def get(self,request):
-        if request.session['current_user_child'] == None:
+        session_id=request.GET.get('session')
+        session=SessionStore(session_key=session_id)
+        if session['current_user_child'] == None:
             courses=Course.objects.filter(type=4)
         else:
-            child_national_code=request.session['current_user_child']
+            child_national_code=session['current_user_child']
             child=ChildUser.objects.get(national_code=child_national_code)
             courses=Course.objects.filter(type=child.type)
         ser_data=CourseModelSerializer(instance=courses,many=True)

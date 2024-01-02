@@ -6,16 +6,17 @@ from accounts.manager import CustomUserManager
 # Create your models here.
 class User(AbstractBaseUser):
     TYPE=[
-        (1,'PARENT'),
+        (1,'FATHER'),
+        (2,'SANJAB-ADMIN')
     ]
     #required fields
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     national_code=models.CharField(max_length=10,unique=True,primary_key=True)
     phone_number=models.CharField(max_length=11,unique=True,null=True,blank=True)
+    type = models.SmallIntegerField(choices=TYPE, null=True, blank=True)
 
 
-    type=models.SmallIntegerField(choices=TYPE,null=True,blank=True)
     father_name=models.CharField(max_length=200,null=True,blank=True)
     birth_date=models.DateField(null=True,blank=True)
     education=models.CharField(max_length=200,null=True,blank=True)
