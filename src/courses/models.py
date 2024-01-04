@@ -57,3 +57,14 @@ class ModuleSchedule(models.Model):
     child=models.ForeignKey(ChildUser,on_delete=models.CASCADE,
                             related_name="child_module_schedule",null=True,blank=True)
     active_at=models.DateTimeField()
+
+class VideoContents(models.Model):
+    name=models.CharField(max_length=200)
+    description=models.TextField()
+    url=models.URLField(max_length=300)
+
+    def __str__(self):
+        return self.name
+    class Meta:
+        verbose_name="video content"
+        verbose_name_plural="video contents"

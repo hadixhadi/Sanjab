@@ -2,8 +2,12 @@ from rest_framework import serializers
 from rest_framework.response import Response
 
 from courses.models import *
-
+class VideoContentModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=VideoContents
+        fields='__all__'
 class ContentModelSerializer(serializers.ModelSerializer):
+
     class Meta:
         model=Content
         fields='__all__'
@@ -32,10 +36,11 @@ class UserCourseModelSerializer(serializers.ModelSerializer):
 
 class CreateUserCourseSerializer(serializers.Serializer):
     course=serializers.IntegerField()
-
+    session_id=serializers.CharField(max_length=400)
 
 class ModuleScheduleSerializer(serializers.ModelSerializer):
     module=ModuleModelSerializer()
     class Meta:
         model=ModuleSchedule
         fields='__all__'
+

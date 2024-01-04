@@ -12,7 +12,6 @@ class CourseView(views.APIView):
     def get(self,request):
         session_id=request.GET.get('session')
         session=SessionStore(session_key=session_id)
-        print(session['current_user_child'])
         if session['current_user_child'] == None:
             courses=Course.objects.filter(type=4)
         else:
@@ -28,12 +27,13 @@ class CreateUserCourseView(views.APIView):
         user=request.user
         print("user type : ",user)
         ser_data=CreateUserCourseSerializer(data=request.data)
+        session=SessionStore(ser_data.validated_data['session_id'])
         if ser_data.is_valid():
             with transaction.atomic():
                 course_id=ser_data.validated_data['course']
                 course=Course.objects.get(pk=course_id)
-                if request.session['current_user_child'] != None:
-                    child_user=ChildUser.objects.get(national_code=request.session['current_user_child'])
+                if session['current_user_child'] != None:
+                    child_user=ChildUser.objects.get(national_code=session['current_user_child'])
                     if course.type == child_user.type :
                         user_course = UserCourse.objects.create(
                             user=user,
