@@ -14,7 +14,7 @@ from django.contrib.sessions.backends.db import SessionStore
 from courses.serializers.front_serializer import ModuleModelSerializer
 # Create your views here.
 
-# TODO: 1-extract method for session
+
 class EntryDashboardView(views.APIView):
     """
      when user registered successfully redirects to this class
@@ -24,6 +24,7 @@ class EntryDashboardView(views.APIView):
         session=SessionStore(session_key=session_id)
         session['current_user']=request.user.national_code
         session['current_user_child']=None
+        session.save()
         print(f"current user : {session['current_user']}")
         print(f"current child : {session['current_user_child']}")
         instance=User.objects.get(national_code=request.user.national_code)
@@ -85,6 +86,7 @@ class ChangeChildUserView(views.APIView):
         ser_data=ChildRegisterSerializer(instance=child)
         session['current_user_child']=national_code
         session['current_user']=national_code
+        session.save()
         print(f" current child user : {session['current_user_child']}")
         print(f"current user : {session['current_user']}")
         return Response(ser_data.data,status=status.HTTP_200_OK)
@@ -114,8 +116,12 @@ class ShowCourseContentsView(views.APIView):
         course=user_course_obj.course
         module=course.module_rel.first()
         age=datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
-        contents=module.content_rel.filter(
-            age__lte=age.days
-        )
+        previous_content=module.content_rel.filter(
+            Q(age__lte=age.days) & Q(is_done=True)
+        ).order_by("-id").first()
+        if previous_content:
+            contents=module.content_rel.filter(
+                Q(age__lte=age.days) & Q(is_done=True)
+            )
         ser_data=ContentModelSerializer(instance=contents,many=True)
         return Response(ser_data.data,status=status.HTTP_200_OK)

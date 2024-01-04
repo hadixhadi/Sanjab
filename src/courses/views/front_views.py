@@ -12,6 +12,7 @@ class CourseView(views.APIView):
     def get(self,request):
         session_id=request.GET.get('session')
         session=SessionStore(session_key=session_id)
+        print(session['current_user_child'])
         if session['current_user_child'] == None:
             courses=Course.objects.filter(type=4)
         else:
@@ -25,6 +26,7 @@ class CreateUserCourseView(views.APIView):
     permission_classes = [IsAuthenticated]
     def post(self,request):
         user=request.user
+        print("user type : ",user)
         ser_data=CreateUserCourseSerializer(data=request.data)
         if ser_data.is_valid():
             with transaction.atomic():
@@ -37,7 +39,7 @@ class CreateUserCourseView(views.APIView):
                             user=user,
                             course=course,
                             child=child_user,
-                            expire_at=datetime.now() + timedelta(days=61)
+                            expire_at=datetime.now() + timedelta(days=15)
                         )
                     else:
                         return Response("your type is not equal with course type",
@@ -46,7 +48,7 @@ class CreateUserCourseView(views.APIView):
                     user_course=UserCourse.objects.create(
                         user=user,
                         course=course,
-                        expire_at=datetime.now() + timedelta(days=61)
+                        expire_at=datetime.now() + timedelta(days=15)
                     )
                 else:
                     return Response("your type is not equal with course type",

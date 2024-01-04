@@ -35,6 +35,7 @@ class Content(models.Model):
     object_id = models.PositiveIntegerField()
     item = GenericForeignKey('content_type', 'object_id')
     is_active=models.BooleanField(default=False,null=True,blank=True)
+    is_done=models.BooleanField(default=False)
     age=models.SmallIntegerField()
     def __str__(self):
         return self.name
