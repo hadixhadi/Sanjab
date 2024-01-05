@@ -8,7 +8,9 @@ class ContentAdmin(admin.ModelAdmin):
     list_display = ['id','name','is_done','age']
 admin.site.register(Module)
 admin.site.register(UserCourse)
-admin.site.register(VideoContents)
+@admin.register(VideoContents)
+class VideoContents(admin.ModelAdmin):
+    list_display = ['id','name','url']
 admin.site.register(CourseInformation)
 @admin.register(ModuleSchedule)
 class ModuleScheduleAdmin(admin.ModelAdmin):

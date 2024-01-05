@@ -42,13 +42,18 @@ class CreateUserCourseView(views.APIView):
                 if session['current_user_child'] != None:
                     child_user=ChildUser.objects.get(national_code=session['current_user_child'])
                     if course.type == child_user.type :
-                        user_course = UserCourse.objects.create(
-                            user=user,
-                            course=course,
-                            child=child_user,
-                            expire_at=expire_date,
-                            is_active=True
-                        )
+                        if UserCourse.objects.filter(Q(user=request.user) & Q(course=course)
+                                                     & Q(child=child_user)).exists():
+                            return Response("you have already registerd this course!",
+                                            status=status.HTTP_403_FORBIDDEN)
+                        else:
+                            user_course = UserCourse.objects.create(
+                                user=user,
+                                course=course,
+                                child=child_user,
+                                expire_at=expire_date,
+                                is_active=True
+                            )
                     else:
                         return Response("your type is not equal with course type",
                                         status=status.HTTP_403_FORBIDDEN)
@@ -66,33 +71,33 @@ class CreateUserCourseView(views.APIView):
                 else:
                     return Response("your type is not equal with course type",
                                     status=status.HTTP_403_FORBIDDEN)
-                    modules=course.module_rel.all()
-                    active_at = datetime.now()
-                    for module in modules:
-                        ModuleSchedule.objects.create(
-                            user_course=user_course,
-                            module=module,
-                            active_at=active_at,
+                modules=course.module_rel.all()
+                active_at = datetime.now()
+                for module in modules:
+                    ModuleSchedule.objects.create(
+                        user_course=user_course,
+                        module=module,
+                        active_at=active_at,
 
-                        )
-                        active_at = datetime.now() + timedelta(days=90)
-                    user_course.save()
-                    # Content.make_exam_content_writeable(module)
-                    interval_instance=IntervalSchedule.objects.create(
-                        every=expire_date.day,
-                        period=IntervalSchedule.DAYS
                     )
-                    PeriodicTask.objects.create(
-                        name=f"expire course {user_course.id} ",
-                        task="courses.tasks.expire_course",
-                        interval=interval_instance,
-                        one_off=True,
-                        kwargs=json.dumps({
-                            "course_id": user_course.id,
-                            "user_national_code":request.user.national_code
-                        }),
-                    )
-                    return Response("course created successfully " , status=status.HTTP_201_CREATED)
+                    active_at = datetime.now() + timedelta(days=90)
+                user_course.save()
+                # Content.make_exam_content_writeable(module)
+                interval_instance=IntervalSchedule.objects.create(
+                    every=expire_date.day,
+                    period=IntervalSchedule.DAYS
+                )
+                PeriodicTask.objects.create(
+                    name=f"expire course {user_course.id} ",
+                    task="courses.tasks.expire_course",
+                    interval=interval_instance,
+                    one_off=True,
+                    kwargs=json.dumps({
+                        "course_id": user_course.id,
+                        "user_national_code":request.user.national_code
+                    }),
+                )
+                return Response("course created successfully " , status=status.HTTP_201_CREATED)
         else:
             return Response(ser_data.errors,status=status.HTTP_403_FORBIDDEN)
 
