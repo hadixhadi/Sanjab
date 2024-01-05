@@ -6,6 +6,7 @@ admin.site.register(Content)
 admin.site.register(Module)
 admin.site.register(UserCourse)
 admin.site.register(VideoContents)
+admin.site.register(CourseInformation)
 @admin.register(ModuleSchedule)
 class ModuleScheduleAdmin(admin.ModelAdmin):
     list_display = ['user_course','child','module','active_at']

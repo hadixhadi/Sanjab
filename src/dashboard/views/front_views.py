@@ -46,9 +46,12 @@ class UserCoursesView(views.APIView):
         session=SessionStore(session_key=session_id)
         if session['current_user_child'] != None:
             child=ChildUser.objects.get(national_code=session['current_user_child'])
-            obj=UserCourse.objects.filter(Q(user=request.user)& Q(child=child))
+            obj=UserCourse.objects.filter(Q(user=request.user)& Q(child=child) & Q(is_active=True)).exclude(
+                Q(expire_at__lte=datetime.now(pytz.timezone("Asia/Tehran")))
+            )
+
         else:
-            obj = UserCourse.objects.filter(Q(user=request.user)& Q(child=None))
+            obj = UserCourse.objects.filter(Q(user=request.user)& Q(child=None) & Q(is_active=True))
         ser_data=UserCourseModelSerializer(instance=obj,many=True)
         return Response(ser_data.data)
 
@@ -105,14 +108,15 @@ class ShowCourseContentsView(views.APIView):
         """
         session_id = request.GET.get('session')
         session = SessionStore(session_key=session_id)
-        if session['current_user_child'] == None:
-            user_course_obj=UserCourse.objects.get(Q(user=request.user) & Q(id=course_id))
-        else:
-            try:
-                user=ChildUser.objects.get(national_code=session['current_user_child'])
-                user_course_obj = UserCourse.objects.get(Q(child=user) & Q(id=course_id))
-            except:
-                return Response("there is not registered course ",status=status.HTTP_200_OK)
+        try:
+            if session['current_user_child'] == None:
+                user_course_obj=UserCourse.objects.get(Q(user=request.user) & Q(id=course_id) & Q(is_active=True))
+            else:
+
+                    user=ChildUser.objects.get(national_code=session['current_user_child'])
+                    user_course_obj = UserCourse.objects.get(Q(child=user) & Q(id=course_id) &Q(is_active=True))
+        except:
+            return Response("there is not registered course ",status=status.HTTP_200_OK)
         course=user_course_obj.course
         module=course.module_rel.first()
         age=datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
@@ -121,7 +125,10 @@ class ShowCourseContentsView(views.APIView):
         ).order_by("-id").first()
         if previous_content:
             contents=module.content_rel.filter(
-                Q(age__lte=age.days) & Q(is_done=True)
+                age__lte=age.days
             )
+            # print("contents : ",len(contents))
+        else:
+            contents=None
         ser_data=ContentModelSerializer(instance=contents,many=True)
         return Response(ser_data.data,status=status.HTTP_200_OK)

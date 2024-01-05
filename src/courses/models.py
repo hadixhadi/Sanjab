@@ -41,11 +41,12 @@ class Content(models.Model):
         return self.name
 class UserCourse(models.Model):
     user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name="user_courses")
-    course=models.ForeignKey(Course,on_delete=models.PROTECT)
+    course=models.ForeignKey(Course,on_delete=models.PROTECT,related_name="user_course_rel")
     created_at=models.DateTimeField(auto_now_add=True)
     child = models.ForeignKey(ChildUser, on_delete=models.CASCADE,
                               related_name="child_user_course", null=True, blank=True)
     expire_at=models.DateTimeField()
+    is_active=models.BooleanField(default=False)
     def __str__(self):
         return f"{self.user} - {self.course}"
 
@@ -68,3 +69,7 @@ class VideoContents(models.Model):
     class Meta:
         verbose_name="video content"
         verbose_name_plural="video contents"
+
+class CourseInformation(models.Model):
+    title=models.CharField(max_length=200,null=True,blank=True)
+    description=models.TextField(null=True,blank=True)
