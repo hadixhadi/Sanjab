@@ -1,7 +1,11 @@
+import json
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
+from django_celery_beat.models import IntervalSchedule, PeriodicTask
+
 from accounts.models import ChildUser
 # Create your models here.
 
@@ -36,9 +40,36 @@ class Content(models.Model):
     item = GenericForeignKey('content_type', 'object_id')
     is_active=models.BooleanField(default=False,null=True,blank=True)
     is_done=models.BooleanField(default=False)
+    is_exam_writeable=models.BooleanField(default=False)
     age=models.SmallIntegerField()
     def __str__(self):
         return self.name
+
+    # @classmethod
+    # def make_exam_content_writeable(cls, user_module):
+    #
+    #     module = user_module
+    #     exam_contents = module.content_rel.filter(
+    #         content_type__model='exam'
+    #     )
+    #     interval_date = 1
+    #     for exam_content in exam_contents.reverse():
+    #         print(exam_content.subject)
+    #         interval_instance = IntervalSchedule.objects.create(
+    #             every=interval_date,
+    #             period=IntervalSchedule.MINUTES
+    #         )
+    #         PeriodicTask.objects.create(
+    #             name=f"make {exam_content} writeable ",
+    #             task="courses.tasks.make_content_exam_writeable_task",
+    #             interval=interval_instance,
+    #             one_off=True,
+    #             kwargs=json.dumps({
+    #                 "exam_content_id": exam_content.id,
+    #                 "module_id":module.id
+    #             }),
+    #         )
+    #         interval_date += 1
 class UserCourse(models.Model):
     user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name="user_courses")
     course=models.ForeignKey(Course,on_delete=models.PROTECT,related_name="user_course_rel")

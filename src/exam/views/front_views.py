@@ -11,7 +11,7 @@ from exam.permissions.permissions import *
 # Create your views here.
 class FrontShowQuestions(views.APIView):
     permission_classes = [IsAuthenticated,IsOwner]
-    def get(self, request, course_id):
+    def get(self, request, course_id,content_id):
         """
         show questions of exam
         this means user entered in dashboard as parent user:
@@ -22,7 +22,7 @@ class FrontShowQuestions(views.APIView):
         """
         session_id = request.GET.get('session')
         session = SessionStore(session_key=session_id)
-        print(session['current_user_child'])
+        # print(session['current_user_child'])
         try:
             if session['current_user_child'] == None:
                 user_course_obj = UserCourse.objects.get(Q(user=request.user) &
@@ -43,7 +43,8 @@ class FrontShowQuestions(views.APIView):
         ).order_by("-id").first()
         if previous_content:
             contents = module.content_rel.filter(
-                Q(age__lte=age.days) & Q(is_done=False)
+                Q(age__lte=age.days) & Q(content_type__model='exam') &
+                Q(pk=content_id)
             )
             # print("contents : ",len(contents))
         else:

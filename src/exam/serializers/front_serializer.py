@@ -1,3 +1,6 @@
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
+
 from courses.models import Content, CourseInformation
 from courses.serializers.front_serializer import CourseInformationSerializer
 from exam.models import *
@@ -24,6 +27,7 @@ class FullExamSerializer(serializers.ModelSerializer):
 
 class ShowExamSerializer(serializers.Serializer):
     content=serializers.SerializerMethodField()
+    is_writeable=serializers.SerializerMethodField()
     def get_content(self,obj):
         content_type = obj.content_type
         model_class = content_type.model_class()
@@ -38,3 +42,11 @@ class ShowExamSerializer(serializers.Serializer):
             serializer = FullExamSerializer(item)
         if serializer:
             return serializer.data
+
+    def get_is_writeable(self,obj):
+        content_type_obj = obj.content_type
+        model_class = content_type_obj.model_class()
+        item_id = obj.object_id
+        content_type=ContentType.objects.get(model="exam")
+        content=Content.objects.get(Q(content_type=content_type) & Q(object_id=item_id))
+        return content.is_exam_writeable

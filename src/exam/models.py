@@ -1,5 +1,9 @@
+import json
+
 from django.db import models
 from django.contrib.auth import get_user_model
+from django_celery_beat.models import IntervalSchedule, PeriodicTask
+
 from courses.models import UserCourse
 class Exam(models.Model):
     TYPE=[
@@ -12,6 +16,9 @@ class Exam(models.Model):
     subject=models.CharField(max_length=200)
     def __str__(self):
         return f"{self.subject}"
+
+
+
 class Question(models.Model):
     TYPE = [
         (1, "Verbal talent"),
@@ -26,6 +33,7 @@ class Question(models.Model):
     question=models.CharField(max_length=400)
     type=models.SmallIntegerField(choices=TYPE,default=1)
     is_complete=models.BooleanField(default=False)
+
     def __str__(self):
         return f"{self.question}"
 

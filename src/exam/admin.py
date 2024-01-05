@@ -7,6 +7,7 @@ class QuestionInline(admin.TabularInline):
     model = Question
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
+    list_display = ['id','subject','type']
     inlines=[
         QuestionInline
     ]
