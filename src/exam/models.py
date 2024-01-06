@@ -13,7 +13,7 @@ class Exam(models.Model):
         (4,"PARENT"),
     ]
     type=models.SmallIntegerField(choices=TYPE)
-    subject=models.CharField(max_length=200)
+    name=models.CharField(max_length=200)
     def __str__(self):
         return f"{self.subject}"
 
