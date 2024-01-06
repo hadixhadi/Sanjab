@@ -125,8 +125,8 @@ class ShowCourseContentsView(views.APIView):
         ).order_by("-id").first()
         if previous_content:
             contents=module.content_rel.filter(
-                age__lte=age.days
-            )
+                Q(age__lte=age.days) & Q(is_done=False)
+            ).first()
             # print("contents : ",len(contents))
         else:
             contents=None
