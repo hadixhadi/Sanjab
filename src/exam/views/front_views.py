@@ -38,7 +38,7 @@ class FrontShowQuestions(views.APIView):
         module = course.module_rel.first()
         age = datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
         previous_content = module.content_rel.filter(
-            Q(age__lte=age.days) & Q(is_done=True)
+            Q(age__lte=age.days)
         ).order_by("-id").first()
         if previous_content:
             contents = module.content_rel.filter(

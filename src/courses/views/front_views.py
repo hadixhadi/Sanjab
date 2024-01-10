@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from accounts.models import ChildUser
 from django.contrib.sessions.backends.db import SessionStore
 from django_celery_beat.models import PeriodicTask , IntervalSchedule
-from exam.models import Exam
+
 # Create your views here.
 
 class CourseView(views.APIView):
@@ -82,6 +82,17 @@ class CreateUserCourseView(views.APIView):
                     )
                     active_at = datetime.now() + timedelta(days=90)
                 user_course.save()
+                course = user_course.course
+                module = course.module_rel.first()
+                first_done_content=module.content_rel.filter(
+                    is_done=True
+                ).first()
+                user_done_content=UserDoneContent.objects.create(
+                    user=request.user,
+                    content=first_done_content
+                )
+                user_done_content.save()
+
                 # Content.make_exam_content_writeable(module)
                 interval_instance=IntervalSchedule.objects.create(
                     every=expire_date.day,
@@ -103,15 +114,8 @@ class CreateUserCourseView(views.APIView):
 
 
 class SetVideoDone(views.APIView):
-    def get(self, request, course_id,content_id,):
-        """
-        show questions of exam
-        this means user entered in dashboard as parent user:
-        `request.session['current_user_child'] == None:`
-        :param request:
-        :param course_id: id of course that user can check
-        :return:
-        """
+    def get(self, request, course_id,content_id,object_id):
+
         session_id = request.GET.get('session')
         session = SessionStore(session_key=session_id)
 
@@ -137,10 +141,12 @@ class SetVideoDone(views.APIView):
         if previous_content:
             contents = module.content_rel.get(
                 Q(age__lte=age.days) & Q(content_type__model='videocontents') &
-                Q(pk=content_id)
+                Q(pk=content_id) & Q(object_id=object_id)
             )
-            contents.is_done=True
-            contents.save()
+            UserDoneContent.objects.create(
+                user=request.user,
+                content=contents
+            )
             return Response("is_done set",status=status.HTTP_200_OK)
         else:
             return Response("error", status=status.HTTP_403_FORBIDDEN)

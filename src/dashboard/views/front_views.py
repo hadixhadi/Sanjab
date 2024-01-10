@@ -1,7 +1,7 @@
 from rest_framework import views, status
 from dashboard.serializers.front_serializer import *
 from rest_framework.response import Response
-from courses.models import UserCourse , ModuleSchedule , Course
+from courses.models import UserCourse, ModuleSchedule, Course,  UserDoneContent
 from courses.serializers.front_serializer import (UserCourseModelSerializer ,
     ModuleScheduleSerializer , ContentModelSerializer
                                                   )
@@ -124,11 +124,15 @@ class ShowCourseContentsView(views.APIView):
             Q(age__lte=age.days) & Q(is_done=True)
         ).order_by("-id").first()
         if previous_content:
-            contents=module.content_rel.filter(
-                Q(age__lte=age.days) & Q(is_done=False)
-            ).first()
-            # print("contents : ",len(contents))
-        else:
-            contents=None
-        ser_data=ContentModelSerializer(instance=contents,many=True)
+            user_last_done_content=UserDoneContent.objects.filter(
+                user=request.user
+            ).order_by("-id").first()
+            if user_last_done_content:
+                contents=module.content_rel.filter(
+                    Q(age__lte=age.days) & Q(id__gt=user_last_done_content.id)
+                )
+                # print("contents : ",len(contents))
+            else:
+                contents=None
+        ser_data=ContentModelSerializer(instance=contents,many=True,context={'request':request})
         return Response(ser_data.data,status=status.HTTP_200_OK)

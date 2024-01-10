@@ -15,7 +15,7 @@ class Exam(models.Model):
     type=models.SmallIntegerField(choices=TYPE)
     name=models.CharField(max_length=200)
     def __str__(self):
-        return f"{self.subject}"
+        return f"{self.name}"
 
 
 

@@ -1,5 +1,4 @@
 import json
-
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
@@ -104,3 +103,12 @@ class VideoContents(models.Model):
 class CourseInformation(models.Model):
     title=models.CharField(max_length=200,null=True,blank=True)
     description=models.TextField(null=True,blank=True)
+
+
+class UserDoneContent(models.Model):
+
+    user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name="user_watch_contents")
+    content=models.ForeignKey(Content,on_delete=models.CASCADE,
+                              related_name="content_user_watch_contents"
+                              ,null=True,blank=True)
+    watch_at=models.DateTimeField(auto_now_add=True)
