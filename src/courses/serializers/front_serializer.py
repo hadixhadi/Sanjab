@@ -25,17 +25,17 @@ class ExamSerializer(serializers.ModelSerializer):
         fields='__all__'
 class ContentModelSerializer(serializers.ModelSerializer):
     content=serializers.SerializerMethodField()
-    done_content=serializers.SerializerMethodField()
+    # done_content=serializers.SerializerMethodField()
     class Meta:
         model=Content
         fields='__all__'
 
-    def get_done_content(self,obj):
-        request=self.context.get('request')
-        done_contents=UserDoneContent.objects.filter(
-            user=request.user
-        )
-        return UserDoneContentSerializer(instance=done_contents,many=True).data
+    # def get_done_content(self,obj):
+    #     request=self.context.get('request')
+    #     done_contents=UserDoneContent.objects.filter(
+    #         user=request.user
+    #     )
+    #     return UserDoneContentSerializer(instance=done_contents,many=True).data
     def get_content(self,obj):
         content_type = obj.content_type
         model_class = content_type.model_class()

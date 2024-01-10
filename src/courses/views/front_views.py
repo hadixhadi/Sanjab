@@ -113,7 +113,7 @@ class CreateUserCourseView(views.APIView):
             return Response(ser_data.errors,status=status.HTTP_403_FORBIDDEN)
 
 
-class SetVideoDone(views.APIView):
+class SetContentDone(views.APIView):
     def get(self, request, course_id,content_id,object_id):
 
         session_id = request.GET.get('session')
@@ -140,13 +140,13 @@ class SetVideoDone(views.APIView):
         ).order_by("-id").first()
         if previous_content:
             contents = module.content_rel.get(
-                Q(age__lte=age.days) & Q(content_type__model='videocontents') &
+                Q(age__lte=age.days) &
                 Q(pk=content_id) & Q(object_id=object_id)
             )
             UserDoneContent.objects.create(
                 user=request.user,
                 content=contents
             )
-            return Response("is_done set",status=status.HTTP_200_OK)
+            return Response("content set done successfully",status=status.HTTP_200_OK)
         else:
             return Response("error", status=status.HTTP_403_FORBIDDEN)
