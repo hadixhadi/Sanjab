@@ -33,7 +33,7 @@ class UserSendOtpCode(APIView):
                 request.session['user_phone_number']=request.data
                 otp_code=random.randint(1000,9999)
                 phone_number=ser_data.data['phone_number']
-                send_otp_code.delay(phone_number=phone_number,otp_code=otp_code)
+
                 otp_code_instance=OtpCode.objects.create(
                     phone_number=phone_number,
                     code=otp_code
@@ -55,6 +55,7 @@ class UserSendOtpCode(APIView):
                     expire_seconds=120
                 )
                 request.session.save()
+                send_otp_code.delay(phone_number=phone_number, otp_code=otp_code)
                 return Response(request.session.session_key,status=status.HTTP_200_OK)
         else:
             return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)

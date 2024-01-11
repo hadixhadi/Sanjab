@@ -3,6 +3,7 @@ from .models import *
 # Register your models here.
 admin.site.register(User)
 admin.site.register(ChildUser)
+admin.site.register(UserProfile)
 @admin.register(OtpCode)
 class OTPAdmin(admin.ModelAdmin):
     model=OtpCode

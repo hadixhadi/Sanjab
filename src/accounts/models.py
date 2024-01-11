@@ -7,7 +7,7 @@ from accounts.manager import CustomUserManager
 class User(AbstractBaseUser):
     TYPE=[
         (1,'FATHER'),
-        (2,'SANJAB-ADMIN')
+        (2,'MOTHER')
     ]
     #required fields
     first_name = models.CharField(max_length=200)
@@ -15,25 +15,11 @@ class User(AbstractBaseUser):
     national_code=models.CharField(max_length=10,unique=True,primary_key=True)
     phone_number=models.CharField(max_length=11,unique=True,null=True,blank=True)
     type = models.SmallIntegerField(choices=TYPE, null=True, blank=True)
-
-
-    father_name=models.CharField(max_length=200,null=True,blank=True)
-    birth_date=models.DateField(null=True,blank=True)
-    education=models.CharField(max_length=200,null=True,blank=True)
-    field_study=models.CharField(max_length=200,null=True,blank=True)
-    telephone=models.CharField(max_length=11,null=True,blank=True)
-    address=models.CharField(max_length=300,null=True,blank=True)
-    Regional_Municipality=models.SmallIntegerField(null=True,blank=True)
-    job=models.CharField(max_length=200,null=True,blank=True)
-    office_address=models.CharField(max_length=200,null=True,blank=True)
-    boys=models.SmallIntegerField(null=True,blank=True)
-    girls=models.SmallIntegerField(null=True,blank=True)
-    is_active=models.BooleanField(default=False)
-    phone_active=models.BooleanField(default=False)
-    is_admin=models.BooleanField(default=False)
-    postal_code=models.CharField(max_length=15,null=True,blank=True)
-    USERNAME_FIELD='phone_number'
-    REQUIRED_FIELDS = ['national_code','first_name','last_name']
+    USERNAME_FIELD = 'phone_number'
+    REQUIRED_FIELDS = ['national_code', 'first_name', 'last_name']
+    is_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+    phone_active = models.BooleanField(default=False)
     objects=CustomUserManager()
 
     def __str__(self):
@@ -55,6 +41,30 @@ class User(AbstractBaseUser):
         # Simplest possible answer: All admins are staff
         return self.is_admin
 
+
+class UserProfile(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="user_profile")
+
+    husband=models.ForeignKey(User,on_delete=models.PROTECT,
+                              related_name="user_profile_husband",
+                              null=True,blank=True)
+    father_name = models.CharField(max_length=200, null=True, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+    education = models.CharField(max_length=200, null=True, blank=True)
+    field_study = models.CharField(max_length=200, null=True, blank=True)
+    telephone = models.CharField(max_length=11, null=True, blank=True)
+    address = models.CharField(max_length=300, null=True, blank=True)
+    Regional_Municipality = models.SmallIntegerField(null=True, blank=True)
+    job = models.CharField(max_length=200, null=True, blank=True)
+    office_address = models.CharField(max_length=200, null=True, blank=True)
+    boys = models.SmallIntegerField(null=True, blank=True)
+    girls = models.SmallIntegerField(null=True, blank=True)
+
+
+    postal_code = models.CharField(max_length=15, null=True, blank=True)
+
+    def __str__(self):
+        return self.user
 class ChildUser(models.Model):
     TYPE = [
         (1, '4-7'),
@@ -70,6 +80,8 @@ class ChildUser(models.Model):
     parent=models.ForeignKey(User,on_delete=models.CASCADE
                              ,related_name="father_child",null=True,blank=True)
     type=models.SmallIntegerField(choices=TYPE)
+    def __str__(self):
+        return f"{self.first_name}  {self.parent}"
 
 class OtpCode(models.Model):
     phone_number=models.CharField(max_length=11,unique=True)
