@@ -77,6 +77,7 @@ class UserCourse(models.Model):
                               related_name="child_user_course", null=True, blank=True)
     expire_at=models.DateTimeField()
     is_active=models.BooleanField(default=False)
+    is_graduated=models.BooleanField(default=False)
     def __str__(self):
         return f"{self.user} - {self.course}"
 
@@ -111,4 +112,5 @@ class UserDoneContent(models.Model):
     content=models.ForeignKey(Content,on_delete=models.CASCADE,
                               related_name="content_user_watch_contents"
                               ,null=True,blank=True)
+    course=models.ForeignKey(Course,on_delete=models.CASCADE,null=True)
     watch_at=models.DateTimeField(auto_now_add=True)

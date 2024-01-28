@@ -7,7 +7,8 @@ from accounts.manager import CustomUserManager
 class User(AbstractBaseUser):
     TYPE=[
         (1,'FATHER'),
-        (2,'MOTHER')
+        (2,'MOTHER'),
+        (3,'EMPLOYER')
     ]
     #required fields
     first_name = models.CharField(max_length=200)
@@ -64,7 +65,7 @@ class UserProfile(models.Model):
     postal_code = models.CharField(max_length=15, null=True, blank=True)
 
     def __str__(self):
-        return self.user
+        return self.user.first_name
 class ChildUser(models.Model):
     TYPE = [
         (1, '4-7'),

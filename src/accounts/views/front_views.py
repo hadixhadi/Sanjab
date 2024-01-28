@@ -89,6 +89,7 @@ class UserOtpCodeVerification(APIView):
                         token_response = {
                             'refresh': str(refresh),
                             'access': str(refresh.access_token),
+                            'is_admin':user.is_admin
                         }
                         return Response(token_response, status=status.HTTP_201_CREATED)
                     except:
@@ -156,6 +157,7 @@ class ChildRegisterView(APIView):
         print("requested user for child register : ",request.user)
         ser_data=ChildRegisterSerializer(data=request.data)
         if ser_data.is_valid():
+
             child_obj=ChildUser.objects.create(**ser_data.validated_data)
             child_obj.parent=request.user
             child_obj.save()
@@ -164,12 +166,3 @@ class ChildRegisterView(APIView):
             return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
-# class UserAdminDashboard(viewsets.ModelViewSet):
-#
-#     def get_queryset(self):
-#         return User.objects.filter(national_code=self.request.user.national_code)
-#     def get_serializer_class(self):
-#         if self.action == 'list':
-#             return UserDashboardSerializer

@@ -31,8 +31,8 @@ class CreateUserCourseView(views.APIView):
     permission_classes = [IsAuthenticated]
     def post(self,request):
         user=request.user
-        print("user type : ",user)
         ser_data=CreateUserCourseSerializer(data=request.data)
+
         if ser_data.is_valid():
             with transaction.atomic():
                 session = SessionStore(ser_data.validated_data['session_id'])
@@ -41,12 +41,16 @@ class CreateUserCourseView(views.APIView):
                 expire_date=datetime.now() + timedelta(days=10)
                 if session['current_user_child'] != None:
                     child_user=ChildUser.objects.get(national_code=session['current_user_child'])
+                    print(course.type)
+                    print(child_user.type)
                     if course.type == child_user.type :
                         if UserCourse.objects.filter(Q(user=request.user) & Q(course=course)
                                                      & Q(child=child_user)).exists():
                             return Response("you have already registerd this course!",
                                             status=status.HTTP_403_FORBIDDEN)
                         else:
+                            print(course.type)
+                            print(request.user.type)
                             user_course = UserCourse.objects.create(
                                 user=user,
                                 course=course,
@@ -143,10 +147,12 @@ class SetContentDone(views.APIView):
                 Q(age__lte=age.days) &
                 Q(pk=content_id) & Q(object_id=object_id)
             )
-            UserDoneContent.objects.create(
-                user=request.user,
-                content=contents
-            )
-            return Response("content set done successfully",status=status.HTTP_200_OK)
+            if not UserDoneContent.objects.get(Q(user=request.user) & Q(content=contents)).exists():
+                UserDoneContent.objects.create(
+                    user=request.user,
+                    content=contents,
+                    course=course_id
+                )
+                return Response("content set done successfully",status=status.HTTP_200_OK)
         else:
             return Response("error", status=status.HTTP_403_FORBIDDEN)

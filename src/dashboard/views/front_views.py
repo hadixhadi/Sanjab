@@ -27,8 +27,8 @@ class EntryDashboardView(views.APIView):
         session.save()
         print(f"current user : {session['current_user']}")
         print(f"current child : {session['current_user_child']}")
-        instance=User.objects.get(national_code=request.user.national_code)
-        ser_data=EntryDashboardSerializer(instance=instance)
+        instance=get_user_model().objects.get(national_code=request.user.national_code)
+        ser_data=UserSerializer(instance=instance)
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
 class UserCoursesView(views.APIView):
@@ -110,13 +110,15 @@ class ShowCourseContentsView(views.APIView):
         session = SessionStore(session_key=session_id)
         try:
             if session['current_user_child'] == None:
-                user_course_obj=UserCourse.objects.get(Q(user=request.user) & Q(id=course_id) & Q(is_active=True))
+                print("**********************************")
+                user_course_obj=UserCourse.objects.get(Q(user=request.user) & Q(id=course_id) &
+                                                       Q(is_active=True))
             else:
-
                     user=ChildUser.objects.get(national_code=session['current_user_child'])
                     user_course_obj = UserCourse.objects.get(Q(child=user) & Q(id=course_id) &Q(is_active=True))
-        except:
-            return Response("there is not registered course ",status=status.HTTP_200_OK)
+        except UserCourse.DoesNotExist as e:
+            error_message = str(e)
+            return Response(error_message, status=status.HTTP_200_OK)
         course=user_course_obj.course
         module=course.module_rel.first()
         age=datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
@@ -129,7 +131,7 @@ class ShowCourseContentsView(views.APIView):
             ).order_by("-id").first()
             if user_last_done_content:
                 contents=module.content_rel.filter(
-                    Q(age__lte=age.days) & Q(id__gt=user_last_done_content.id)
+                    Q(age__lte=age.days) & Q(id__gte=user_last_done_content.id)
                 )
                 # print("contents : ",len(contents))
             else:
