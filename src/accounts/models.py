@@ -46,7 +46,7 @@ class User(AbstractBaseUser):
 class UserProfile(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="user_profile")
 
-    husband=models.ForeignKey(User,on_delete=models.PROTECT,
+    husband=models.ForeignKey(User,on_delete=models.CASCADE,
                               related_name="user_profile_husband",
                               null=True,blank=True)
     father_name = models.CharField(max_length=200, null=True, blank=True)

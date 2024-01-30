@@ -17,3 +17,8 @@ admin.site.register(AnswerQuestion)
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
     list_display=['user','exam','grade']
+
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ["id","question","type","exam"]

@@ -32,7 +32,7 @@ class Question(models.Model):
     exam=models.ForeignKey(Exam,on_delete=models.CASCADE,related_name="questions")
     question=models.CharField(max_length=400)
     type=models.SmallIntegerField(choices=TYPE,default=1)
-    is_complete=models.BooleanField(default=False)
+
 
     def __str__(self):
         return f"{self.question}"
@@ -41,6 +41,7 @@ class AnswerQuestion(models.Model):
     user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
     question=models.ForeignKey(Question,on_delete=models.CASCADE)
     answer=models.SmallIntegerField()
+    exam=models.ForeignKey(Exam,on_delete=models.CASCADE,blank=True,null=True)
 class Evaluation(models.Model):
     TALENT=[
         (1,"Verbal talent"),
@@ -53,7 +54,7 @@ class Evaluation(models.Model):
     ]
     user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
     exam=models.ForeignKey(Exam,on_delete=models.PROTECT)
-    grade=models.SmallIntegerField()
+    grade=models.FloatField()
     talent=models.SmallIntegerField(choices=TALENT,default=1)
     def __str__(self):
         return f"{self.user} -- {self.grade} -- {self.exam}"
