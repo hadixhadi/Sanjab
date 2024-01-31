@@ -61,7 +61,7 @@ class UserProfile(models.Model):
     boys = models.SmallIntegerField(null=True, blank=True)
     girls = models.SmallIntegerField(null=True, blank=True)
 
-
+    registered_at=models.DateTimeField(auto_now_add=True,null=True)
     postal_code = models.CharField(max_length=15, null=True, blank=True)
 
     def __str__(self):

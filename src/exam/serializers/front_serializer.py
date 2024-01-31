@@ -50,3 +50,11 @@ class ShowExamSerializer(serializers.Serializer):
         content_type=ContentType.objects.get(model="exam")
         content=Content.objects.get(Q(content_type=content_type) & Q(object_id=item_id))
         return content.is_exam_writeable
+
+
+class UserAnswers(serializers.Serializer):
+    question=serializers.IntegerField()
+    answer=serializers.IntegerField()
+
+    def create(self, validated_data):
+        pass

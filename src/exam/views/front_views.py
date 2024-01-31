@@ -52,8 +52,8 @@ class FrontShowQuestions(views.APIView):
         return Response(ser_data.data, status=status.HTTP_200_OK)
 
 
-class SetExamDone(views.APIView):
-    def get(self, request, course_id,content_id,):
+class CommitExam(views.APIView):
+    def post(self, request, course_id,content_id,):
         """
         show questions of exam
         this means user entered in dashboard as parent user:
@@ -76,19 +76,19 @@ class SetExamDone(views.APIView):
                                                          Q(id=course_id) & Q(is_active=True))
         except Exception as e:
             return Response({'error':str(e)})
+
+
         course = user_course_obj.course
         module = course.module_rel.first()
         age = datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
-        previous_content = module.content_rel.filter(
-            Q(age__lte=age.days) & Q(is_done=True)
-        ).order_by("-id").first()
-        if previous_content:
-            contents = module.content_rel.get(
+        exam = module.content_rel.get(
                 Q(age__lte=age.days) & Q(content_type__model='exam') &
                 Q(pk=content_id)
             )
-            contents.is_done=True
-            contents.save()
-            return Response("is_done set",status=status.HTTP_200_OK)
-        else:
-            return Response("error", status=status.HTTP_403_FORBIDDEN)
+
+        requested_user=request.user
+
+
+
+        return Response("is_done set",status=status.HTTP_200_OK)
+

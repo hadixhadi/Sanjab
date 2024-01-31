@@ -5,7 +5,6 @@ from django.db import transaction
 from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.serializers.front_serializer import *
-from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -17,11 +16,13 @@ from django_celery_beat.models import PeriodicTask , IntervalSchedule
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.sessions.backends.db import SessionStore
 # Create your views here.
+
+
 class UserSendOtpCode(APIView):
     """
-    get phone number with POST method and store it in sessions
-    then create an OtpCode instance in database and create a PeriodTask instance for
-    remove created OtpCode instance in database if user does not send any code
+    create OTP code instance and send to user phone number.
+    create a celery task to expire created OTP code after 2 min.
+
     """
     permission_classes = [AllowAny]
     throttle_scope='enter_phone_number'
@@ -60,13 +61,10 @@ class UserSendOtpCode(APIView):
         else:
             return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
 
+
 class UserOtpCodeVerification(APIView):
     """
-    retrieve phone number that user send in `UserSendOtpCode` from session
-    and compare that with OtpCode instance
-    if user already registered method  returns a JWTtoken
-    and if user not registered it returns False
-    otherwise it returns aporopiat error
+    verify otp code and create JWT token if already registered.
     """
     permission_classes = [AllowAny]
     throttle_scope='otp_verification_views'
@@ -108,8 +106,7 @@ class UserOtpCodeVerification(APIView):
 
 class UserRegisterationView(APIView):
     """
-    user fill the parent form and if everything was ok
-    returns JWTtoken and save data in database
+    fill parent user form to register and create JWT token.
     """
     permission_classes = [AllowAny]
     throttle_scope='user_register_views'
@@ -142,10 +139,10 @@ class UserRegisterationView(APIView):
                 'error':error_message
             },status=400)
 
+
 class ChildRegisterView(APIView):
     """
-    user fill child register form and if everything was ok
-    return serializer data
+    register child user with post method and retrieve user's children with get method.
     """
     permission_classes = [IsAuthenticated]
     throttle_scope='user_register_views'

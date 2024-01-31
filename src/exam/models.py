@@ -14,6 +14,7 @@ class Exam(models.Model):
     ]
     type=models.SmallIntegerField(choices=TYPE)
     name=models.CharField(max_length=200)
+    is_last=models.BooleanField(default=False)
     def __str__(self):
         return f"{self.name}"
 
@@ -58,3 +59,20 @@ class Evaluation(models.Model):
     talent=models.SmallIntegerField(choices=TALENT,default=1)
     def __str__(self):
         return f"{self.user} -- {self.grade} -- {self.exam}"
+
+
+"""
+{
+    'user':1,
+    answers:{
+        "1":9,
+        "2":10,
+        ...
+    }
+
+}
+
+
+
+
+"""

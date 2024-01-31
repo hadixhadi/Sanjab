@@ -1,14 +1,19 @@
 from accounts.models import *
 from rest_framework import serializers
-from courses.models import UserCourse
 
 class UserProfileModelSerializer(serializers.ModelSerializer):
     class Meta:
         model=UserProfile
         fields='__all__'
         read_only_fields = ['user']
+
+
 class RegisterOrLoginSrializer(serializers.Serializer):
     phone_number=serializers.CharField()
+
+
+
+
 class UserRegisterSerializer(serializers.ModelSerializer):
     user_profile=UserProfileModelSerializer()
     class Meta:
@@ -21,8 +26,14 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+
+
 class UserVerificationCodeSerializer(serializers.Serializer):
     code=serializers.IntegerField()
+
+
+
+
 class ChildRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model=ChildUser

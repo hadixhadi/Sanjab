@@ -1,5 +1,6 @@
 from django.urls import path
-from dashboard.views.admin_views import RegisteredCourses, EntryAdminDashboard, ShowUsers, ShowDetailsUsers
+from dashboard.views.admin_views import RegisteredCourses, EntryAdminDashboard, \
+    ShowUsers, ShowDetailsUsers
 
 urlpatterns=[
     path("",EntryAdminDashboard.as_view(),name='admin-dashboard-entry'),

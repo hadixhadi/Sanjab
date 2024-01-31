@@ -10,9 +10,17 @@ from courses.serializers.front_serializer import CourseModelSerializer
 
 
 class UserIdentifierSerializer(serializers.ModelSerializer):
+    user_profile=serializers.SerializerMethodField()
     class Meta:
         model=get_user_model()
         fields=['first_name','last_name','national_code','phone_number']
+
+    def get_user_profile(self, obj):
+            user_national_code = obj.national_code
+            user = get_user_model().objects.get(national_code=user_national_code)
+            user_profile = UserProfile.objects.get(user=user)
+            return UserProfileModelSerializer(instance=user_profile).data
+
 class RegisteredCoursesSerializer(serializers.ModelSerializer):
     user=serializers.SerializerMethodField()
     child_user=serializers.SerializerMethodField()
@@ -24,11 +32,11 @@ class RegisteredCoursesSerializer(serializers.ModelSerializer):
     def get_user(self,obj):
         return UserIdentifierSerializer(instance=obj.user).data
     def get_child_user(self,obj):
-        child_user=ChildUser.objects.get(national_code=obj.child)
+        child_user=ChildUser.objects.get(national_code=obj.child.national_code)
         ser_data=ChildRegisterSerializer(instance=child_user)
         return ser_data.data
     def get_course(self,obj):
-        course=Course.objects.get(pk=obj.course)
+        course=Course.objects.get(pk=obj.course.id)
         ser_data=CourseModelSerializer(instance=course)
         return ser_data.data
 
