@@ -7,5 +7,6 @@ urlpatterns=[
     path('phone-verification/',UserOtpCodeVerification.as_view(), name='phone-verification'),
     path('user-register/',UserRegisterationView.as_view(),name='user-register'),
     path('child-register/', ChildRegisterView.as_view(), name='child-register'),
+    path('logout/',Logout.as_view(),name='logout')
 
 ]

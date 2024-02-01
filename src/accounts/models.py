@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.contrib.auth.models import  AbstractBaseUser
 from django.utils import timezone
@@ -44,7 +45,7 @@ class User(AbstractBaseUser):
 
 
 class UserProfile(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="user_profile")
+    user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name="user_profile")
 
     husband=models.ForeignKey(User,on_delete=models.CASCADE,
                               related_name="user_profile_husband",

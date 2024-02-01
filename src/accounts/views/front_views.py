@@ -163,3 +163,19 @@ class ChildRegisterView(APIView):
             return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
+class Logout(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self,request):
+        ser_data=LogoutSerializer(data=request.data)
+        if ser_data.is_valid():
+            token=ser_data.validated_data['token']
+            print(token)
+            try:
+                refresh_token=RefreshToken(token)
+                refresh_token.blacklist()
+                return Response(status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response(str(e),status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
+

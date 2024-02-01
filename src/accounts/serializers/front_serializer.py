@@ -41,3 +41,5 @@ class ChildRegisterSerializer(serializers.ModelSerializer):
 
 
 
+class LogoutSerializer(serializers.Serializer):
+    token=serializers.CharField(required=True)
