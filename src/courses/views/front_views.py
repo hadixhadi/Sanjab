@@ -36,28 +36,15 @@ class CreateUserCourseView(views.APIView):
             return Response(ser_data.errors,status=status.HTTP_403_FORBIDDEN)
 
 
+
 class SetContentDone(views.APIView):
 
     def get(self, request, course_id,content_id,object_id):
-        session_id = request.GET.get('session')
-        session = SessionStore(session_key=session_id)
-        try:
-            if session['current_user_child'] == None:
-
-                user_course_obj = UserCourse.objects.get(Q(user=request.user) &
-                                                         Q(id=course_id) & Q(is_active=True))
-            else:
-
-                    user = ChildUser.objects.get(national_code=session['current_user_child'])
-                    user_course_obj = UserCourse.objects.get(Q(child=user) &
-                                                             Q(id=course_id) & Q(is_active=True))
-        except Exception as e:
-            return Response({'error':str(e)})
-
-        user_done_content=UserDoneContent.create_user_done_content_instance(
+        user_course_obj=UserCourse.get_user_course(request=request,course_id=course_id)
+        user_done_content=UserDoneContent.create_user_done_content(
             request=request,user_course_obj=user_course_obj,
             course_id=course_id,content_id=content_id,object_id=object_id
         )
-        return user_done_content
+        return Response(user_done_content.data)
 
 

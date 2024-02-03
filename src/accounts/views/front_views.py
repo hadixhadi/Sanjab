@@ -104,7 +104,7 @@ class UserOtpCodeVerification(APIView):
             return Response(str(e))
 
 
-class UserRegisterationView(APIView):
+class UserRegistrationView(APIView):
     """
     fill parent user form to register and create JWT token.
     """

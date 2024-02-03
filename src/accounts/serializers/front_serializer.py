@@ -24,8 +24,10 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(**validated_data)
         UserProfile.objects.create(user=user, **user_profile_data)
         return user
-
-
+    def validate_type(self,value):
+        if value == 3:
+            raise serializers.ValidationError("Only type 1 and 3 are allowed!")
+        return value
 
 
 class UserVerificationCodeSerializer(serializers.Serializer):

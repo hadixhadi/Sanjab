@@ -5,6 +5,7 @@ from django.db import models, transaction
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from django.contrib.sessions.backends.db import SessionStore
 from rest_framework.response import Response
@@ -157,6 +158,22 @@ class UserCourse(models.Model):
             )
             return Response("course created successfully ", status=status.HTTP_201_CREATED)
 
+    @classmethod
+    def get_user_course(cls,request,course_id):
+        session_id = request.GET.get('session')
+        session = SessionStore(session_key=session_id)
+        try:
+            if session['current_user_child'] == None:
+                user_course_obj = UserCourse.objects.get(Q(user=request.user) &
+                                                         Q(id=course_id) & Q(is_active=True))
+            else:
+
+                user = ChildUser.objects.get(national_code=session['current_user_child'])
+                user_course_obj = UserCourse.objects.get(Q(child=user) &
+                                                         Q(id=course_id) & Q(is_active=True))
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        return user_course_obj
 
 class ModuleSchedule(models.Model):
     user_course=models.ForeignKey(UserCourse,on_delete=models.CASCADE,
@@ -198,8 +215,8 @@ class UserDoneContent(models.Model):
 
 
     @classmethod
-    def create_user_done_content_instance(cls,request,user_course_obj,
-                                          content_id,object_id,course_id):
+    def create_user_done_content(cls, request, user_course_obj,
+                                 content_id, object_id, course_id):
         course = user_course_obj.course
         module = course.module_rel.first()
         age = datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
@@ -214,16 +231,20 @@ class UserDoneContent(models.Model):
                 Q(pk=content_id) & Q(object_id=object_id)
             )
 
-
-            user_done_content_obj = UserDoneContent.objects.get(
-                Q(user=request.user) & Q(content=contents)
-            ).exists()
-            if not user_done_content_obj:
-                UserDoneContent.objects.create(
-                    user=request.user,
-                    content=contents,
-                    course=course_id
-                )
-                return Response("content set done successfully", status=status.HTTP_200_OK)
+            user_done_content_obj=None
+            try:
+                user_done_content_obj = get_object_or_404(UserDoneContent,
+                                                          user=request.user,
+                                                          content=contents)
+                if user_done_content_obj is not None:
+                    return Response('this content set done already!',status=status.HTTP_403_FORBIDDEN)
+            except :
+                if not user_done_content_obj:
+                    UserDoneContent.objects.create(
+                        user=request.user,
+                        content=contents,
+                        course=course
+                    )
+                    return Response("content set done successfully", status=status.HTTP_200_OK)
         else:
             return Response("error", status=status.HTTP_403_FORBIDDEN)

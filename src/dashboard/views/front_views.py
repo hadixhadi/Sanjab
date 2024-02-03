@@ -11,7 +11,6 @@ from accounts.models import ChildUser
 from accounts.serializers.front_serializer import ChildRegisterSerializer
 import pytz
 from django.contrib.sessions.backends.db import SessionStore
-from courses.serializers.front_serializer import ModuleModelSerializer
 # Create your views here.
 
 
@@ -106,20 +105,11 @@ class ShowCourseContentsView(views.APIView):
         :param course_id: id of course that user can check
         :return:
         """
-        session_id = request.GET.get('session')
-        session = SessionStore(session_key=session_id)
         try:
-            if session['current_user_child'] == None:
-                print("**********************************")
-                user_course_obj=UserCourse.objects.get(Q(user=request.user) & Q(id=course_id) &
-                                                       Q(is_active=True))
-            else:
-                    user=ChildUser.objects.get(national_code=session['current_user_child'])
-                    user_course_obj = UserCourse.objects.get(Q(child=user) & Q(id=course_id) &Q(is_active=True))
-        except UserCourse.DoesNotExist as e:
-            error_message = str(e)
-            return Response(error_message, status=status.HTTP_200_OK)
-        course=user_course_obj.course
+            user_course_obj=UserCourse.get_user_course(request=request,course_id=course_id)
+            course = user_course_obj.course
+        except Exception as e:
+            return Response(user_course_obj.data,status=status.HTTP_400_BAD_REQUEST)
         module=course.module_rel.first()
         age=datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
         previous_content=module.content_rel.filter(

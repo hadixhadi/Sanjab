@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers, status
-
 from accounts.models import UserProfile
 from accounts.serializers.front_serializer import UserProfileModelSerializer, ChildRegisterSerializer
 from courses.models import UserCourse, Course
@@ -32,11 +31,15 @@ class RegisteredCoursesSerializer(serializers.ModelSerializer):
     def get_user(self,obj):
         return UserIdentifierSerializer(instance=obj.user).data
     def get_child_user(self,obj):
-        child_user=ChildUser.objects.get(national_code=obj.child.national_code)
-        ser_data=ChildRegisterSerializer(instance=child_user)
-        return ser_data.data
+        child_obj=obj.child
+        if child_obj is not None:
+            child_user=ChildUser.objects.get(national_code=obj.child.national_code)
+            ser_data=ChildRegisterSerializer(instance=child_user)
+            return ser_data.data
+        return None
     def get_course(self,obj):
         course=Course.objects.get(pk=obj.course.id)
+        print(course)
         ser_data=CourseModelSerializer(instance=course)
         return ser_data.data
 
@@ -58,3 +61,8 @@ class AdminUpdateUserSerializer(serializers.ModelSerializer):
             ser_data.save()
             return UserProfileModelSerializer(instance=user_profile).data
         return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
+
+    def validate_type(self,value):
+        if value == 3 :
+            raise serializers.ValidationError("Only type 1 and 3 are allowed!")
+        return value
