@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers, status
-from accounts.models import UserProfile
+from accounts.models import UserProfile, User
 from accounts.serializers.front_serializer import UserProfileModelSerializer, ChildRegisterSerializer
 from courses.models import UserCourse, Course
 from rest_framework.response import Response
@@ -66,3 +66,9 @@ class AdminUpdateUserSerializer(serializers.ModelSerializer):
         if value == 3 :
             raise serializers.ValidationError("Only type 1 and 3 are allowed!")
         return value
+
+
+class CreateEmployerUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=User
+        exclude=['is_active','phone_active','password',]

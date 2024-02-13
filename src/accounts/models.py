@@ -19,6 +19,7 @@ class User(AbstractBaseUser):
     type = models.SmallIntegerField(choices=TYPE, null=True, blank=True)
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['national_code', 'first_name', 'last_name']
+    is_super_admin=models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
     phone_active = models.BooleanField(default=False)

@@ -87,7 +87,8 @@ class UserOtpCodeVerification(APIView):
                         token_response = {
                             'refresh': str(refresh),
                             'access': str(refresh.access_token),
-                            'is_admin':user.is_admin
+                            'is_admin':user.is_admin,
+                            'is_super_admin':user.is_super_admin
                         }
                         return Response(token_response, status=status.HTTP_201_CREATED)
                     except:

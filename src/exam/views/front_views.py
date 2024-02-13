@@ -4,7 +4,8 @@ from rest_framework import viewsets, views, status
 from exam.serializers.front_serializer import *
 from rest_framework.permissions import IsAuthenticated
 from exam.permissions.permissions import *
-# Create your views here.
+
+
 class FrontShowQuestions(views.APIView):
     permission_classes = [IsAuthenticated,IsOwner]
     def get(self, request, course_id,content_id):

@@ -1,12 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser , IsAuthenticated
 from courses.models import UserCourse
-from dashboard.serializers.admin_serializer import RegisteredCoursesSerializer,UserIdentifierSerializer,AdminUpdateUserSerializer
+from dashboard.serializers.admin_serializer import RegisteredCoursesSerializer,\
+    UserIdentifierSerializer,AdminUpdateUserSerializer, CreateEmployerUserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from dashboard.serializers.front_serializer import UserSerializer
+from dashboard.permissions.admin_permissions import IsSuperAdminUser
 class RegisteredCourses(APIView):
     permission_classes = [IsAdminUser]
     def get(self,request):
@@ -24,7 +26,10 @@ class EntryAdminDashboard(APIView):
 class ShowUsers(APIView):
     permission_classes = [IsAdminUser]
     def get(self,request):
-        all_users=get_user_model().objects.filter(is_admin=False)
+        if request.user.is_super_admin == True:
+            all_users = get_user_model().objects.all()
+        else:
+            all_users=get_user_model().objects.filter(is_admin=False)
         ser_data=UserIdentifierSerializer(instance=all_users,many=True)
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
@@ -54,3 +59,16 @@ class ShowDetailsUsers(APIView):
 
 
 
+class CreateEmployerUser(APIView):
+    permission_classes = [IsAdminUser,IsSuperAdminUser]
+    def post(self,request):
+        ser_data=CreateEmployerUserSerializer(data=request.data)
+        if ser_data.is_valid():
+            employer=get_user_model().objects.create(**ser_data.validated_data)
+            employer.is_admin=True
+            employer.is_active=True
+            employer.phone_active=True
+            employer.type=3
+            employer.save()
+            return Response("created successfully",status=status.HTTP_201_CREATED)
+        return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
