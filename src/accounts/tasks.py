@@ -1,6 +1,7 @@
 from kavenegar import KavenegarAPI, APIException, HTTPException
 from celery import shared_task
 from accounts.models import OtpCode
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken , BlacklistedToken
 @shared_task
 def send_otp_code(phone_number,otp_code):
     """
@@ -35,3 +36,8 @@ def remove_otp_code(id):
         instance.delete()
     except:
         pass
+
+@shared_task
+def flush_expired_token():
+    OutstandingToken.objects.all().delete()
+    BlacklistedToken.objects.all().delete()

@@ -1,6 +1,6 @@
 import json
 
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth import get_user_model
 from django_celery_beat.models import IntervalSchedule, PeriodicTask
 
@@ -38,9 +38,13 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.question}"
 
+    @classmethod
+    def get_question_types(cls):
+        return cls.TYPE
+
 class AnswerQuestion(models.Model):
     user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
-    question=models.ForeignKey(Question,on_delete=models.CASCADE)
+    question=models.OneToOneField(Question,on_delete=models.CASCADE)
     answer=models.SmallIntegerField()
     exam=models.ForeignKey(Exam,on_delete=models.CASCADE,blank=True,null=True)
 class Evaluation(models.Model):
@@ -59,6 +63,49 @@ class Evaluation(models.Model):
     talent=models.SmallIntegerField(choices=TALENT,default=1)
     def __str__(self):
         return f"{self.user} -- {self.grade} -- {self.exam}"
+
+    @classmethod
+    def evaluate_exam(cls,request, exam_id, course_id):
+        types = Question.TYPE
+        print(course_id)
+        # request = get_user_model().objects.get(national_code=request.user.national_code)
+        user_answers = AnswerQuestion.objects.filter(user=request.user, exam=exam_id)
+        exam_obj = Exam.objects.get(id=exam_id)
+        try:
+            with transaction.atomic():
+                for i in range(len(types)):
+                    answers = []
+                    points=0
+                    for user_answer in user_answers:
+                        if user_answer.question.type==i+1 and user_answer.answer != 9:
+                            answers.append(user_answer)
+                            print(f"answers {answers} ")
+                    for j in answers:
+                        points += int(j.answer)
+                    if points == 0 :
+                        grade=0
+                    else:
+                        grade=float(points/len(answers))
+                    Evaluation.objects.create(
+                        user=request.user, exam=exam_obj, grade=grade,
+                        talent=i + 1
+                    )
+            return True
+        except Exception as e:
+            return False
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 """

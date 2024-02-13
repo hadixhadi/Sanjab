@@ -112,19 +112,20 @@ class ShowCourseContentsView(views.APIView):
             return Response(user_course_obj.data,status=status.HTTP_400_BAD_REQUEST)
         module=course.module_rel.first()
         age=datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
-        previous_content=module.content_rel.filter(
-            Q(age__lte=age.days) & Q(is_done=True)
-        ).order_by("-id").first()
-        if previous_content:
-            user_last_done_content=UserDoneContent.objects.filter(
-                user=request.user
-            ).order_by("-id").first()
-            if user_last_done_content:
-                contents=module.content_rel.filter(
-                    Q(age__lte=age.days) & Q(id__gte=user_last_done_content.id)
-                )
-                # print("contents : ",len(contents))
-            else:
-                contents=None
+        # previous_content=module.content_rel.filter(
+        #     Q(age__lte=age.days) & Q(is_done=True)
+        # ).order_by("-id").first()
+        # if previous_content:
+        #     user_last_done_content=UserDoneContent.objects.filter(
+        #         user=request.user
+        #     ).order_by("-id").first()
+        #     if user_last_done_content:
+        contents=module.content_rel.filter(
+            age__lte=age.days
+        )
+            # else:
+            #     contents=None
+
+        print(contents)
         ser_data=ContentModelSerializer(instance=contents,many=True,context={'request':request})
         return Response(ser_data.data,status=status.HTTP_200_OK)

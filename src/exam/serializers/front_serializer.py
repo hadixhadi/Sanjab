@@ -1,13 +1,16 @@
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from django.db.models import Q
+from django.forms import model_to_dict
 
 from courses.models import Content, CourseInformation
 from courses.serializers.front_serializer import CourseInformationSerializer
 from exam.models import *
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
+
 class FrontQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model=Question
@@ -52,9 +55,44 @@ class ShowExamSerializer(serializers.Serializer):
         return content.is_exam_writeable
 
 
-class UserAnswers(serializers.Serializer):
-    question=serializers.IntegerField()
-    answer=serializers.IntegerField()
+class AnswerSerializer(serializers.Serializer):
+    question_id = serializers.IntegerField()
+    answer_value = serializers.IntegerField()
+
+
+
+
+class UserAnswerSerializer(serializers.Serializer):
+    answers = serializers.DictField()
 
     def create(self, validated_data):
-        pass
+        with transaction.atomic():
+            answers_data = validated_data['answers']
+            user_answers = []
+            request=self.context.get("request")
+            course_id=self.context.get("course_id")
+            user=request.user
+            exam=self.context.get('content_exam')
+            exam_obj=Exam.objects.get(pk=exam.object_id)
+            for question_id,answer_id in answers_data.items():
+                question_instance=Question.objects.get(pk=question_id)
+                user_answers.append(AnswerQuestion(user=user,exam=exam_obj,
+                                                  question=question_instance,answer=answer_id
+                                                   ))
+
+
+            if exam_obj.is_last:
+               AnswerQuestion.objects.bulk_create(user_answers)
+               evaluated_exam = Evaluation.evaluate_exam(request=request,
+                                           exam_id=exam_obj.id,course_id=course_id)
+               if evaluated_exam:
+                   user_course=UserCourse.get_user_course(request=request,course_id=course_id)
+                   user_course.is_graduated=True
+                   user_course.save()
+            else:
+                AnswerQuestion.objects.bulk_create(user_answers)
+
+
+
+        return Response("done",status=status.HTTP_200_OK)
+

@@ -12,8 +12,9 @@ class ExamAdmin(admin.ModelAdmin):
         QuestionInline
     ]
 
-
-admin.site.register(AnswerQuestion)
+@admin.register(AnswerQuestion)
+class AnswerQuestionAdmin(admin.ModelAdmin):
+    list_display = ['id','user','exam','question','answer']
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
     list_display=['user','exam','grade']
