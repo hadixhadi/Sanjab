@@ -9,7 +9,8 @@ class User(AbstractBaseUser):
     TYPE=[
         (1,'FATHER'),
         (2,'MOTHER'),
-        (3,'EMPLOYER')
+        (3,'EMPLOYER'),
+        (4,"SUPER ADMIN")
     ]
     #required fields
     first_name = models.CharField(max_length=200)
