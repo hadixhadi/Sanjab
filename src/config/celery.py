@@ -16,3 +16,24 @@ app.conf.beat_schedule={
         'schedule': crontab(hour=3,minute=0),  # Run every 12 hours
     },
 }
+
+app.conf.beat_schedule={
+    'run-periodic-task-every-12-hours': {
+        'task': 'dashboard.tasks.count_website_views',
+        'schedule': crontab(hour=2,minute=30),  # Run every 12 hours
+    },
+}
+
+app.conf.beat_schedule={
+    'run-periodic-task-every-12-hours': {
+        'task': 'dashboard.tasks.count_all_registered_courses',
+        'schedule': crontab(hour=2,minute=40),  # Run every 12 hours
+    },
+}
+
+app.conf.beat_schedule={
+    'run-periodic-task-every-12-hours': {
+        'task': 'dashboard.tasks.count_users',
+        'schedule': crontab(hour=2,minute=50),  # Run every 12 hours
+    },
+}

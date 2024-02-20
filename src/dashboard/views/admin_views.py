@@ -4,11 +4,12 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser , IsAuthenticated
 from courses.models import UserCourse
 from dashboard.serializers.admin_serializer import RegisteredCoursesSerializer,\
-    UserIdentifierSerializer,AdminUpdateUserSerializer, CreateEmployerUserSerializer
+    UserIdentifierSerializer,AdminUpdateUserSerializer, CreateEmployerUserSerializer ,SimpleStaticSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from dashboard.serializers.front_serializer import UserSerializer
 from dashboard.permissions.admin_permissions import IsSuperAdminUser
+from dashboard.models import SimpleStattic
 class RegisteredCourses(APIView):
     permission_classes = [IsAdminUser]
     def get(self,request):
@@ -72,3 +73,12 @@ class CreateEmployerUser(APIView):
             employer.save()
             return Response("created successfully",status=status.HTTP_201_CREATED)
         return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class ShowStatics(APIView):
+    permission_classes = [IsAdminUser]
+    def get(self,request):
+        simple_statics=SimpleStattic.objects.all()
+        ser_data=SimpleStaticSerializer(instance=simple_statics,many=True)
+        return Response(ser_data.data,status=status.HTTP_200_OK)

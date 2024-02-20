@@ -6,13 +6,13 @@ from courses.models import UserCourse, Course
 from rest_framework.response import Response
 from accounts.models import ChildUser
 from courses.serializers.front_serializer import CourseModelSerializer
-
+from dashboard.models import SimpleStattic
 
 class UserIdentifierSerializer(serializers.ModelSerializer):
     # user_profile=serializers.SerializerMethodField()
     class Meta:
         model=get_user_model()
-        fields=['first_name','last_name','national_code','phone_number']
+        fields=['first_name','last_name','national_code','phone_number','type']
 
     # def get_user_profile(self, obj):
     #     user_national_code = obj.national_code
@@ -72,3 +72,10 @@ class CreateEmployerUserSerializer(serializers.ModelSerializer):
     class Meta:
         model=User
         exclude=['is_active','phone_active','password',]
+
+
+
+class SimpleStaticSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=SimpleStattic
+        exclude=['id']
