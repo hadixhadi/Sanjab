@@ -11,29 +11,22 @@ app.conf.broker_url = 'amqp://rabbitmq'
 CELERY_RESULT_BACKEND = 'django-db'
 
 app.conf.beat_schedule={
-    'run-periodic-task-every-12-hours': {
+    'flush-expire-tokens-database': {
         'task': 'accounts.tasks.flush_expired_token',
         'schedule': crontab(hour=3,minute=0),  # Run every 12 hours
     },
-}
-
-app.conf.beat_schedule={
-    'run-periodic-task-every-12-hours': {
+    'count-all-site-views': {
         'task': 'dashboard.tasks.count_website_views',
         'schedule': crontab(hour=2,minute=30),  # Run every 12 hours
     },
-}
-
-app.conf.beat_schedule={
-    'run-periodic-task-every-12-hours': {
+    'count-all-registered-courses': {
         'task': 'dashboard.tasks.count_all_registered_courses',
         'schedule': crontab(hour=2,minute=40),  # Run every 12 hours
     },
-}
-
-app.conf.beat_schedule={
-    'run-periodic-task-every-12-hours': {
+    'count-all-registered-users': {
         'task': 'dashboard.tasks.count_users',
         'schedule': crontab(hour=2,minute=50),  # Run every 12 hours
     },
 }
+
+

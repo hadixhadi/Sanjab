@@ -10,6 +10,7 @@ from rest_framework import status
 from dashboard.serializers.front_serializer import UserSerializer
 from dashboard.permissions.admin_permissions import IsSuperAdminUser
 from dashboard.models import SimpleStattic
+from rest_framework import generics
 class RegisteredCourses(APIView):
     permission_classes = [IsAdminUser]
     def get(self,request):
@@ -24,15 +25,33 @@ class EntryAdminDashboard(APIView):
         ser_data=UserIdentifierSerializer(instance=request.user)
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
-class ShowUsers(APIView):
+# class ShowUsers(APIView):
+#     permission_classes = [IsAdminUser]
+#     def get(self,request):
+#         if request.user.is_super_admin == True:
+#             all_users = get_user_model().objects.all()
+#         else:
+#             all_users=get_user_model().objects.filter(is_admin=False)
+#         ser_data=UserIdentifierSerializer(instance=all_users,many=True)
+#         return Response(ser_data.data,status=status.HTTP_200_OK)
+
+
+class ShowUsers(generics.GenericAPIView):
     permission_classes = [IsAdminUser]
-    def get(self,request):
-        if request.user.is_super_admin == True:
+    serializer_class = UserIdentifierSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_super_admin == True:
             all_users = get_user_model().objects.all()
         else:
             all_users=get_user_model().objects.filter(is_admin=False)
-        ser_data=UserIdentifierSerializer(instance=all_users,many=True)
-        return Response(ser_data.data,status=status.HTTP_200_OK)
+        return all_users
+
+    def list(self, request, *args, **kwargs):
+        queryset=self.get_queryset()
+        serializer_data=self.get_serializer(queryset,many=True)
+        return Response(serializer_data.data,status=status.HTTP_200_OK)
+
 
 
 class ShowDetailsUsers(APIView):
