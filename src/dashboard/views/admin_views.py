@@ -25,32 +25,32 @@ class EntryAdminDashboard(APIView):
         ser_data=UserIdentifierSerializer(instance=request.user)
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
-# class ShowUsers(APIView):
-#     permission_classes = [IsAdminUser]
-#     def get(self,request):
-#         if request.user.is_super_admin == True:
-#             all_users = get_user_model().objects.all()
-#         else:
-#             all_users=get_user_model().objects.filter(is_admin=False)
-#         ser_data=UserIdentifierSerializer(instance=all_users,many=True)
-#         return Response(ser_data.data,status=status.HTTP_200_OK)
-
-
-class ShowUsers(generics.GenericAPIView):
+class ShowUsers(APIView):
     permission_classes = [IsAdminUser]
-    serializer_class = UserIdentifierSerializer
-
-    def get_queryset(self):
-        if self.request.user.is_super_admin == True:
+    def get(self,request):
+        if request.user.is_super_admin == True:
             all_users = get_user_model().objects.all()
         else:
             all_users=get_user_model().objects.filter(is_admin=False)
-        return all_users
+        ser_data=UserIdentifierSerializer(instance=all_users,many=True)
+        return Response(ser_data.data,status=status.HTTP_200_OK)
 
-    def list(self, request, *args, **kwargs):
-        queryset=self.get_queryset()
-        serializer_data=self.get_serializer(queryset,many=True)
-        return Response(serializer_data.data,status=status.HTTP_200_OK)
+
+# class ShowUsers(generics.GenericAPIView):
+#     permission_classes = [IsAdminUser]
+#     serializer_class = UserIdentifierSerializer
+#
+#     def get_queryset(self):
+#         if self.request.user.is_super_admin == True:
+#             all_users = get_user_model().objects.all()
+#         else:
+#             all_users=get_user_model().objects.filter(is_admin=False)
+#         return all_users
+#
+#     def list(self, request, *args, **kwargs):
+#         queryset=self.get_queryset()
+#         serializer_data=self.get_serializer(queryset,many=True)
+#         return Response(serializer_data.data,status=status.HTTP_200_OK)
 
 
 

@@ -38,11 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #local apps
     'exam',
     'courses',
     'rest_framework',
     'accounts',
     'dashboard',
+    'orders',
+    #third party apps
     "drf_spectacular",
     "corsheaders",
     'django_celery_beat',
