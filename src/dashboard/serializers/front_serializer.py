@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from accounts.models import  UserProfile
+from accounts.models import  UserProfile , ChildUser
 from accounts.serializers.front_serializer import ChildRegisterSerializer , UserProfileModelSerializer
 
 
@@ -21,3 +21,8 @@ class UserSerializer(serializers.ModelSerializer):
         ser_data=ChildRegisterSerializer(childes,many=True)
         return ser_data.data
 
+
+class ModifyChildSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=ChildUser
+        exclude=("national_code","type","parent")

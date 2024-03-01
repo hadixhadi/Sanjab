@@ -129,3 +129,16 @@ class ShowCourseContentsView(views.APIView):
         print(contents)
         ser_data=ContentModelSerializer(instance=contents,many=True,context={'request':request})
         return Response(ser_data.data,status=status.HTTP_200_OK)
+
+
+
+class ModifyChildView(views.APIView):
+    def put(self,request,national_code):
+        user=get_user_model().objects.get(national_code=request.user.national_code)
+        child=user.father_child.get(national_code=national_code)
+        ser_data=ModifyChildSerializer(instance=child,data=request.data,partial=True)
+        if ser_data.is_valid():
+            ser_data.save()
+            new_ser_data=ChildRegisterSerializer(instance=child)
+            return Response(new_ser_data.data,status=status.HTTP_200_OK)
+        return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
