@@ -33,7 +33,7 @@ REST_FRAMEWORK = {
 # "http://192.168.100.31:3000",
 # "http://192.168.100.15:8000",
 # )
-CSRF_TRUSTED_ORIGINS = ["http://192.168.100.31:3000","http://0.0.0.0","http://194.9.56.86"]
+CSRF_TRUSTED_ORIGINS = ["http://192.168.100.31:3000","http://0.0.0.0","http://194.9.56.82"]
 CORS_ALLOW_ALL_ORIGINS=True
 
 
