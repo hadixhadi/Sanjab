@@ -23,6 +23,8 @@ class ExamSerializer(serializers.ModelSerializer):
         fields='__all__'
 class ContentModelSerializer(serializers.ModelSerializer):
     content=serializers.SerializerMethodField()
+    # progress_process=serializers.SerializerMethodField()
+
     class Meta:
         model=Content
         fields='__all__'
@@ -43,6 +45,22 @@ class ContentModelSerializer(serializers.ModelSerializer):
             serializer = CourseInformationSerializer(item)
         if serializer:
             return serializer.data
+
+
+    # def get_progress_process(self,obj):
+    #     request=self.context.get("request")
+    #     course_id=self.context.get("course_id")
+    #
+    #     registered_course_obj=UserCourse.objects.get(id=course_id)
+    #     course_obj=registered_course_obj.course
+    #     module_obj=course_obj.module_rel.first()
+    #     all_course_contents=module_obj.content_rel.all().count()
+    #     done_content=UserDoneContent.objects.filter(user=request.user,
+    #                                                 course__id=course_obj.id).count()
+    #
+    #
+    #     progress_process_percent=float((done_content/all_course_contents))*100
+    #     return progress_process_percent
 class ModuleModelSerializer(serializers.ModelSerializer):
     content=serializers.SerializerMethodField()
     class Meta:

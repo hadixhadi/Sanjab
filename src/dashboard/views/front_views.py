@@ -16,7 +16,7 @@ from django.contrib.sessions.backends.db import SessionStore
 
 class EntryDashboardView(views.APIView):
     """
-     when user registered successfully redirects to this class
+     when user registered successfully redirects to this view
     """
     def get(self,request):
         session_id=request.GET.get('session')
@@ -112,27 +112,33 @@ class ShowCourseContentsView(views.APIView):
             return Response(user_course_obj.data,status=status.HTTP_400_BAD_REQUEST)
         module=course.module_rel.first()
         age=datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
-        # previous_content=module.content_rel.filter(
-        #     Q(age__lte=age.days) & Q(is_done=True)
-        # ).order_by("-id").first()
-        # if previous_content:
-        #     user_last_done_content=UserDoneContent.objects.filter(
-        #         user=request.user
-        #     ).order_by("-id").first()
-        #     if user_last_done_content:
-        contents=module.content_rel.filter(
-            age__lte=age.days
-        )
-            # else:
-            #     contents=None
 
-        print(contents)
-        ser_data=ContentModelSerializer(instance=contents,many=True,context={'request':request})
+        all_contents=module.content_rel.all().count()
+        all_done_contents=UserDoneContent.objects.filter(user=request.user,
+                                                         course=course).count()
+
+
+        print("all contents : ", all_contents)
+        print("all done contents : ",all_done_contents)
+        if all_done_contents < all_contents:
+            contents=module.content_rel.filter(
+                age__lte=age.days
+            )
+            ser_data = ContentModelSerializer(instance=contents, many=True, context={'request': request,
+                                                                                     "course_id": course_id})
+        else:
+            all_done_contents = UserDoneContent.objects.filter(user=request.user,course=course)
+            ser_data=UserDoneContentsModelSerializer(instance=all_done_contents,many=True)
+
+
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
 
 
 class ModifyChildView(views.APIView):
+    """
+    modify child information except national code.
+    """
     def put(self,request,national_code):
         user=get_user_model().objects.get(national_code=request.user.national_code)
         child=user.father_child.get(national_code=national_code)
@@ -142,3 +148,14 @@ class ModifyChildView(views.APIView):
             new_ser_data=ChildRegisterSerializer(instance=child)
             return Response(new_ser_data.data,status=status.HTTP_200_OK)
         return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class CoursesByChild(views.APIView):
+    """
+    Status of registered courses by child
+    """
+    def get(self,request):
+        user_courses=UserCourse.objects.filter(user=request.user)
+        ser_data=UserCourseModelSerializer(instance=user_courses,many=True)
+        return Response(ser_data.data,status=status.HTTP_200_OK)

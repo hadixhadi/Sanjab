@@ -2,6 +2,9 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from accounts.models import  UserProfile , ChildUser
 from accounts.serializers.front_serializer import ChildRegisterSerializer , UserProfileModelSerializer
+from courses.models import UserCourse, UserDoneContent
+from courses.models import Content
+from courses.serializers.front_serializer import ContentModelSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,3 +29,23 @@ class ModifyChildSerializer(serializers.ModelSerializer):
     class Meta:
         model=ChildUser
         exclude=("national_code","type","parent")
+
+
+
+
+# class UserCourseModelSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model=UserCourse
+#         fields='__all__'
+
+
+class UserDoneContentsModelSerializer(serializers.ModelSerializer):
+    content=serializers.SerializerMethodField()
+    class Meta:
+        model=UserDoneContent
+        fields='__all__'
+
+    def get_content(self,obj):
+        content_obj=Content.objects.get(id=obj.content.id)
+        ser_data=ContentModelSerializer(instance=content_obj)
+        return ser_data.data

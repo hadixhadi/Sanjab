@@ -26,7 +26,6 @@ class Course(models.Model):
     description=models.TextField()
     price=models.BigIntegerField()
     type=models.SmallIntegerField(choices=TYPE)
-
     def __str__(self):
         return self.name
 
@@ -51,7 +50,6 @@ class Content(models.Model):
     object_id = models.PositiveIntegerField()
     item = GenericForeignKey('content_type', 'object_id')
     is_active=models.BooleanField(default=False,null=True,blank=True)
-    is_done=models.BooleanField(default=False)
     is_exam_writeable=models.BooleanField(default=False)
     age=models.SmallIntegerField()
     def __str__(self):
@@ -133,9 +131,7 @@ class UserCourse(models.Model):
             user_course.save()
             course = user_course.course
             module = course.module_rel.first()
-            first_done_content = module.content_rel.filter(
-                is_done=True
-            ).first()
+            first_done_content = module.content_rel.first()
             user_done_content = UserDoneContent.objects.create(
                 user=request.user,
                 content=first_done_content
@@ -222,29 +218,39 @@ class UserDoneContent(models.Model):
         age = datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
 
 
-        previous_content = module.content_rel.filter(
-            Q(age__lte=age.days) & Q(is_done=True)
-        ).order_by("-id").first()
-        if previous_content:
-            contents = module.content_rel.get(
-                Q(age__lte=age.days) &
-                Q(pk=content_id) & Q(object_id=object_id)
-            )
+        # previous_content = module.content_rel.filter(
+        #     Q(age__lte=age.days) & Q(is_done=True)
+        # ).order_by("-id").first()
+        # if previous_content:
+        contents = module.content_rel.get(
+            Q(age__lte=age.days) &
+            Q(pk=content_id) & Q(object_id=object_id)
+        )
 
-            user_done_content_obj=None
-            try:
-                user_done_content_obj = get_object_or_404(UserDoneContent,
-                                                          user=request.user,
-                                                          content=contents)
-                if user_done_content_obj is not None:
-                    return Response('this content set done already!',status=status.HTTP_403_FORBIDDEN)
-            except :
-                if not user_done_content_obj:
-                    UserDoneContent.objects.create(
-                        user=request.user,
-                        content=contents,
-                        course=course
-                    )
-                    return Response("content set done successfully", status=status.HTTP_200_OK)
-        else:
-            return Response("error", status=status.HTTP_403_FORBIDDEN)
+        user_done_content_obj=None
+        try:
+            user_done_content_obj = get_object_or_404(UserDoneContent,
+                                                      user=request.user,
+                                                      content=contents)
+            if user_done_content_obj is not None:
+                return Response('this content set done already!',status=status.HTTP_403_FORBIDDEN)
+        except :
+            if not user_done_content_obj:
+                UserDoneContent.objects.create(
+                    user=request.user,
+                    content=contents,
+                    course=course
+                )
+                return Response("content set done successfully", status=status.HTTP_200_OK)
+        return Response("error", status=status.HTTP_403_FORBIDDEN)
+
+
+
+class ContentPrerequisite(models.Model):
+    prerequisite_content = models.ForeignKey(Content,
+                                                  on_delete=models.CASCADE,
+                                             related_name="prerequisite_content")
+    content = models.ForeignKey(Content,
+                                     on_delete=models.CASCADE,related_name="main_content")
+
+    course=models.ForeignKey(Course,on_delete=models.CASCADE,related_name="prerequisite_course")

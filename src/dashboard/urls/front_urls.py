@@ -6,5 +6,7 @@ urlpatterns=[
     path("course-modules/<int:id>",UserCourseModules.as_view(),name="user-course-modules"),
     path("change-child-user/<int:national_code>/",ChangeChildUserView.as_view(),name="change-child-user"),
     path("my-course/<int:course_id>/",ShowCourseContentsView.as_view(),name="show-contents"),
-    path("modify-child/<int:national_code>",ModifyChildView.as_view(),name="modify-child")
+    #course_id => UserCourse record id
+    path("modify-child/<int:national_code>",ModifyChildView.as_view(),name="modify-child"),
+    path("child-courses",CoursesByChild.as_view(),name="courses-by-child")
 ]

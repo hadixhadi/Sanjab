@@ -5,9 +5,12 @@ admin.site.register(Course)
 
 @admin.register(Content)
 class ContentAdmin(admin.ModelAdmin):
-    list_display = ['id','name','module','is_done','age']
+    list_display = ['id','name','module','age']
 admin.site.register(Module)
-admin.site.register(UserCourse)
+@admin.register(UserCourse)
+class UserCourseAdmin(admin.ModelAdmin):
+    list_display = ['id','user','course','child','created_at',
+                    'expire_at','is_active','is_graduated']
 @admin.register(VideoContents)
 class VideoContents(admin.ModelAdmin):
     list_display = ['id','name','url']
@@ -18,3 +21,6 @@ class ModuleScheduleAdmin(admin.ModelAdmin):
 @admin.register(UserDoneContent)
 class UserDoneContentAdmin(admin.ModelAdmin):
     list_display = ['user','content']
+
+
+admin.site.register(ContentPrerequisite)
