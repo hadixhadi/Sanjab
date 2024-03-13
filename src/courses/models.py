@@ -202,7 +202,8 @@ class CourseInformation(models.Model):
 class UserDoneContent(models.Model):
     user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE,
                            related_name="user_watch_contents")
-
+    child=models.ForeignKey(ChildUser,on_delete=models.CASCADE,
+                            related_name="child_user_done_content_rel",null=True)
     content=models.ForeignKey(Content,on_delete=models.CASCADE,
                               related_name="content_user_watch_contents"
                               ,null=True,blank=True)
@@ -217,11 +218,9 @@ class UserDoneContent(models.Model):
         module = course.module_rel.first()
         age = datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
 
+        session_id=request.GET.get('session')
+        session=SessionStore(session_key=session_id)
 
-        # previous_content = module.content_rel.filter(
-        #     Q(age__lte=age.days) & Q(is_done=True)
-        # ).order_by("-id").first()
-        # if previous_content:
         contents = module.content_rel.get(
             Q(age__lte=age.days) &
             Q(pk=content_id) & Q(object_id=object_id)
@@ -236,11 +235,16 @@ class UserDoneContent(models.Model):
                 return Response('this content set done already!',status=status.HTTP_403_FORBIDDEN)
         except :
             if not user_done_content_obj:
-                UserDoneContent.objects.create(
+                done_content_obj=UserDoneContent.objects.create(
                     user=request.user,
                     content=contents,
                     course=course
                 )
+                if session['current_user_child'] != None:
+                    child_national_code = session['current_user_child']
+                    child = ChildUser.objects.get(national_code=child_national_code)
+                    done_content_obj.child=child
+                done_content_obj.save()
                 return Response("content set done successfully", status=status.HTTP_200_OK)
         return Response("error", status=status.HTTP_403_FORBIDDEN)
 

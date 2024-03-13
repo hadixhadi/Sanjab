@@ -41,6 +41,8 @@ class SetContentDone(views.APIView):
 
     def get(self, request, course_id,content_id,object_id):
         user_course_obj=UserCourse.get_user_course(request=request,course_id=course_id)
+        session_id=request.GET.get('session')
+        session=SessionStore(session_key=session_id)
         user_done_content=UserDoneContent.create_user_done_content(
             request=request,user_course_obj=user_course_obj,
             course_id=course_id,content_id=content_id,object_id=object_id

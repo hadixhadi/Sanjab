@@ -159,3 +159,4 @@ class CoursesByChild(views.APIView):
         user_courses=UserCourse.objects.filter(user=request.user)
         ser_data=UserCourseModelSerializer(instance=user_courses,many=True)
         return Response(ser_data.data,status=status.HTTP_200_OK)
+
