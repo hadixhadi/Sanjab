@@ -113,19 +113,19 @@ class ShowCourseContentsView(views.APIView):
         module=course.module_rel.first()
         age=datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
 
-        all_contents=module.content_rel.all().count()
+        all_contents = module.content_rel.filter(
+            age__lte=age.days
+        ).count()
         all_done_contents=UserDoneContent.objects.filter(user=request.user,
                                                          course=course).count()
 
-
-        print("all contents : ", all_contents)
-        print("all done contents : ",all_done_contents)
-        if all_done_contents < all_contents:
+        if all_done_contents <= all_contents:
             contents=module.content_rel.filter(
                 age__lte=age.days
             )
-            ser_data = ContentModelSerializer(instance=contents, many=True, context={'request': request,
-                                                                                     "course_id": course_id})
+            ser_data = ContentModelSerializer(instance=contents, many=True,
+                                              context={'request': request,
+                                                        'course_id':course_id})
         else:
             all_done_contents = UserDoneContent.objects.filter(user=request.user,course=course)
             ser_data=UserDoneContentsModelSerializer(instance=all_done_contents,many=True)
