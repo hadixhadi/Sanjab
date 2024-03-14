@@ -45,3 +45,21 @@ class ChildRegisterSerializer(serializers.ModelSerializer):
 
 class LogoutSerializer(serializers.Serializer):
     token=serializers.CharField(required=True)
+
+
+
+class RegisterHusbandModelSerializer(serializers.ModelSerializer):
+    user_profile=UserProfileModelSerializer()
+    class Meta:
+        model=User
+        exclude=['is_active','is_admin','phone_active','password','type']
+    def create(self, validated_data):
+        user_profile_data = validated_data.pop('user_profile')
+        user = User.objects.create(**validated_data)
+        request=self.context.get('request')
+        UserProfile.objects.create(user=user,husband=request.user, **user_profile_data)
+        return user
+    def validate_type(self,value):
+        if value == 3:
+            raise serializers.ValidationError("Only type 1 and 3 are allowed!")
+        return value

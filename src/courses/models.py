@@ -31,12 +31,15 @@ class Course(models.Model):
 
 
 
+
+
 class Module(models.Model):
     name=models.CharField(max_length=200)
     course=models.ForeignKey(Course,on_delete=models.CASCADE,related_name="module_rel")
 
     def __str__(self):
         return self.name
+
 
 
 
@@ -54,6 +57,7 @@ class Content(models.Model):
     age=models.SmallIntegerField()
     def __str__(self):
         return self.name
+
 
 
 
@@ -171,6 +175,9 @@ class UserCourse(models.Model):
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
         return user_course_obj
 
+
+
+
 class ModuleSchedule(models.Model):
     user_course=models.ForeignKey(UserCourse,on_delete=models.CASCADE,
                                   related_name="user_course_moduleschedule")
@@ -179,6 +186,7 @@ class ModuleSchedule(models.Model):
     child=models.ForeignKey(ChildUser,on_delete=models.CASCADE,
                             related_name="child_module_schedule",null=True,blank=True)
     active_at=models.DateTimeField()
+
 
 
 
@@ -197,6 +205,7 @@ class VideoContents(models.Model):
 class CourseInformation(models.Model):
     title=models.CharField(max_length=200,null=True,blank=True)
     description=models.TextField(null=True,blank=True)
+
 
 
 class UserDoneContent(models.Model):

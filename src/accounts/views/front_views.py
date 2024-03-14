@@ -82,15 +82,16 @@ class UserOtpCodeVerification(APIView):
                     try:
                         user=get_object_or_404(User,phone_number=user_phone_number)
                         instance.delete()
-                        print(request.user)
-                        refresh = RefreshToken.for_user(user)
-                        token_response = {
-                            'refresh': str(refresh),
-                            'access': str(refresh.access_token),
-                            'is_admin':user.is_admin,
-                            'is_super_admin':user.is_super_admin
-                        }
-                        return Response(token_response, status=status.HTTP_201_CREATED)
+                        if user.phone_active ==True:
+                            refresh = RefreshToken.for_user(user)
+                            token_response = {
+                                'refresh': str(refresh),
+                                'access': str(refresh.access_token),
+                                'is_admin':user.is_admin,
+                                'is_super_admin':user.is_super_admin
+                            }
+                            return Response(token_response, status=status.HTTP_201_CREATED)
+                        return Response('phone number is not active!',status=status.HTTP_403_FORBIDDEN)
                     except:
                         instance.delete()
                         return JsonResponse({
@@ -98,7 +99,7 @@ class UserOtpCodeVerification(APIView):
                         })
                 elif instance.expire_at < current_time:
                     instance.delete()
-                    return Response('time expired',status=status.HTTP_403_FORBIDDEN)
+                    return Response('code expired',status=status.HTTP_403_FORBIDDEN)
                 else:
                     return Response('code is wrong', status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
@@ -180,3 +181,19 @@ class Logout(APIView):
         else:
             return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
 
+
+class RegisterHusband(APIView):
+    def post(self,request):
+        ser_data=RegisterHusbandModelSerializer(data=request.data,context={'request':request})
+        if ser_data.is_valid():
+            with transaction.atomic():
+                user = ser_data.save()
+                user.phone_active = False
+                user.is_active = False
+                if request.user.type ==1:
+                    user.type =2
+                else:
+                    user.type=1
+                user.save()
+                return Response(ser_data.data,status=status.HTTP_201_CREATED)
+        return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)

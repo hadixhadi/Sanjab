@@ -72,6 +72,9 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.first_name
+
+
+
 class ChildUser(models.Model):
     TYPE = [
         (1, '4-7'),
@@ -89,6 +92,7 @@ class ChildUser(models.Model):
     type=models.SmallIntegerField(choices=TYPE)
     def __str__(self):
         return f"{self.first_name}  {self.parent}"
+
 
 class OtpCode(models.Model):
     phone_number=models.CharField(max_length=11,unique=True)

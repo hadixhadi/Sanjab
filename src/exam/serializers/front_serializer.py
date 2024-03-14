@@ -79,8 +79,6 @@ class UserAnswerSerializer(serializers.Serializer):
                 user_answers.append(AnswerQuestion(user=user,exam=exam_obj,
                                                   question=question_instance,answer=answer_id
                                                    ))
-
-
             if exam_obj.is_last:
                AnswerQuestion.objects.bulk_create(user_answers)
                evaluated_exam = Evaluation.evaluate_exam(request=request,
@@ -91,8 +89,5 @@ class UserAnswerSerializer(serializers.Serializer):
                    user_course.save()
             else:
                 AnswerQuestion.objects.bulk_create(user_answers)
-
-
-
         return Response("done",status=status.HTTP_200_OK)
 
