@@ -172,7 +172,8 @@ class UserCourse(models.Model):
                 user_course_obj = UserCourse.objects.get(Q(child=user) &
                                                          Q(id=course_id) & Q(is_active=True))
         except Exception as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+            raise e
+            # return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
         return user_course_obj
 
 
@@ -241,7 +242,8 @@ class UserDoneContent(models.Model):
                                                       user=request.user,
                                                       content=contents)
             if user_done_content_obj is not None:
-                return Response('this content set done already!',status=status.HTTP_403_FORBIDDEN)
+                return Response('this content set done already!',
+                                status=status.HTTP_403_FORBIDDEN)
         except :
             if not user_done_content_obj:
                 done_content_obj=UserDoneContent.objects.create(

@@ -44,7 +44,7 @@ class Question(models.Model):
 
 class AnswerQuestion(models.Model):
     user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
-    question=models.OneToOneField(Question,on_delete=models.CASCADE)
+    question=models.ForeignKey(Question,on_delete=models.CASCADE)
     answer=models.SmallIntegerField()
     exam=models.ForeignKey(Exam,on_delete=models.CASCADE,blank=True,null=True)
 class Evaluation(models.Model):

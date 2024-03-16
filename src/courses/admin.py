@@ -23,4 +23,9 @@ class UserDoneContentAdmin(admin.ModelAdmin):
     list_display = ['user','content']
 
 
-admin.site.register(ContentPrerequisite)
+
+
+
+@admin.register(ContentPrerequisite)
+class ContentPrerequisiteAdmin(admin.ModelAdmin):
+    list_display = ['prerequisite_content','content','course']
