@@ -18,6 +18,8 @@ admin.site.register(CourseInformation)
 @admin.register(ModuleSchedule)
 class ModuleScheduleAdmin(admin.ModelAdmin):
     list_display = ['user_course','child','module','active_at']
+
+
 @admin.register(UserDoneContent)
 class UserDoneContentAdmin(admin.ModelAdmin):
     list_display = ['user','content']

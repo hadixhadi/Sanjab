@@ -237,6 +237,7 @@ class UserDoneContent(models.Model):
         )
 
         user_done_content_obj=None
+        print(contents.content_type.id)
         try:
             user_done_content_obj = get_object_or_404(UserDoneContent,
                                                       user=request.user,
@@ -245,7 +246,8 @@ class UserDoneContent(models.Model):
                 return Response('this content set done already!',
                                 status=status.HTTP_403_FORBIDDEN)
         except :
-            if not user_done_content_obj:
+            if not user_done_content_obj and contents.content_type.id != 6:
+
                 done_content_obj=UserDoneContent.objects.create(
                     user=request.user,
                     content=contents,

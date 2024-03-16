@@ -184,16 +184,22 @@ class Logout(APIView):
 
 class RegisterHusband(APIView):
     def post(self,request):
-        ser_data=RegisterHusbandModelSerializer(data=request.data,context={'request':request})
-        if ser_data.is_valid():
-            with transaction.atomic():
-                user = ser_data.save()
-                user.phone_active = False
-                user.is_active = False
-                if request.user.type ==1:
-                    user.type =2
-                else:
-                    user.type=1
-                user.save()
-                return Response(ser_data.data,status=status.HTTP_201_CREATED)
-        return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
+        husband=request.user.user_profile_husband.first().user
+        if husband is None :
+            ser_data=RegisterHusbandModelSerializer(data=request.data,context={'request':request})
+            if ser_data.is_valid():
+                with transaction.atomic():
+                    user = ser_data.save()
+                    user.phone_active = False
+                    user.is_active = False
+                    if request.user.type ==1:
+                        user.type =2
+                    else:
+                        user.type=1
+                    user.save()
+                    return Response(ser_data.data,status=status.HTTP_201_CREATED)
+            return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return JsonResponse({
+                "register_husband":False
+            })
