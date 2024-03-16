@@ -133,14 +133,14 @@ class UserCourse(models.Model):
                 )
                 active_at = datetime.now() + timedelta(days=90)
             user_course.save()
-            course = user_course.course
-            module = course.module_rel.first()
-            first_done_content = module.content_rel.first()
-            user_done_content = UserDoneContent.objects.create(
-                user=request.user,
-                content=first_done_content
-            )
-            user_done_content.save()
+            # course = user_course.course
+            # module = course.module_rel.first()
+            # first_done_content = module.content_rel.first()
+            # user_done_content = UserDoneContent.objects.create(
+            #     user=request.user,
+            #     content=first_done_content
+            # )
+            # user_done_content.save()
 
             interval_instance = IntervalSchedule.objects.create(
                 every=expire_date.day,
