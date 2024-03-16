@@ -32,6 +32,9 @@ class FrontShowQuestions(views.APIView):
 
         session_id = request.GET.get('session')
         session = SessionStore(session_key=session_id)
+
+        user_done_content_obj = UserDoneContent.objects.filter(course=course, user=request.user,
+                                                               content__id=content_id)
         if session['current_user_child']!=None:
             child_national_code = session['current_user_child']
             child = ChildUser.objects.get(national_code=child_national_code)
