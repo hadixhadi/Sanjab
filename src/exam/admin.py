@@ -2,6 +2,10 @@ from django.contrib import admin
 from .models import *
 # Register your models here.
 
+@admin.register(ExamDone)
+class ExamDoneAdmin(admin.ModelAdmin):
+    list_display=['user','child','exam','created_at']
+
 
 class QuestionInline(admin.TabularInline):
     model = Question
@@ -17,7 +21,7 @@ class AnswerQuestionAdmin(admin.ModelAdmin):
     list_display = ['id','user','exam','question','answer']
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
-    list_display=['user','exam','grade']
+    list_display=['user','child','exam','grade']
 
 
 @admin.register(Question)

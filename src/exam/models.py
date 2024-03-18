@@ -3,8 +3,10 @@ import json
 from django.db import models, transaction
 from django.contrib.auth import get_user_model
 from django_celery_beat.models import IntervalSchedule, PeriodicTask
-
+from accounts.models import ChildUser
 from courses.models import UserCourse
+from django.contrib.sessions.backends.db import SessionStore
+
 class Exam(models.Model):
     TYPE=[
         (1,'4-7'),
@@ -18,7 +20,11 @@ class Exam(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-
+class ExamDone(models.Model):
+    user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name="user_exam_done")
+    child=models.ForeignKey(ChildUser,on_delete=models.PROTECT,related_name="child_exam_done")
+    exam=models.ForeignKey(Exam,on_delete=models.PROTECT)
+    created_at=models.DateTimeField(auto_now_add=True)
 
 class Question(models.Model):
     TYPE = [
@@ -47,6 +53,8 @@ class AnswerQuestion(models.Model):
     question=models.ForeignKey(Question,on_delete=models.CASCADE)
     answer=models.SmallIntegerField()
     exam=models.ForeignKey(Exam,on_delete=models.CASCADE,blank=True,null=True)
+
+
 class Evaluation(models.Model):
     TALENT=[
         (1,"Verbal talent"),
@@ -58,6 +66,8 @@ class Evaluation(models.Model):
         (7,"Social aptitude")
     ]
     user=models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
+    child=models.ForeignKey(ChildUser,on_delete=models.CASCADE,
+                            related_name="child_exam_values")
     exam=models.ForeignKey(Exam,on_delete=models.PROTECT)
     grade=models.FloatField()
     talent=models.SmallIntegerField(choices=TALENT,default=1)
@@ -67,10 +77,13 @@ class Evaluation(models.Model):
     @classmethod
     def evaluate_exam(cls,request, exam_id, course_id):
         types = Question.TYPE
-        print(course_id)
         # request = get_user_model().objects.get(national_code=request.user.national_code)
         user_answers = AnswerQuestion.objects.filter(user=request.user, exam=exam_id)
         exam_obj = Exam.objects.get(id=exam_id)
+        session_id = request.GET.get('session')
+        session = SessionStore(session_key=session_id)
+        child_national_code = session['current_user_child']
+        child = ChildUser.objects.get(national_code=child_national_code)
         try:
             with transaction.atomic():
                 for i in range(len(types)):
@@ -88,7 +101,7 @@ class Evaluation(models.Model):
                         grade=float(points/len(answers))
                     Evaluation.objects.create(
                         user=request.user, exam=exam_obj, grade=grade,
-                        talent=i + 1
+                        talent=i + 1,child=child
                     )
             return True
         except Exception as e:

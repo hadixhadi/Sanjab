@@ -20,6 +20,9 @@ urlpatterns=[
     path("modify-child/<int:national_code>",ModifyChildView.as_view(),
          name="modify-child"),
 
-    path("child-courses",CoursesByChild.as_view(),
-         name="courses-by-child")
+    path("child-courses/<int:national_code>",CoursesByChild.as_view(),
+         name="courses-by-child"),
+
+    path("child-values/<int:national_code>/",ChildValues.as_view(),
+         name="child-values")
 ]

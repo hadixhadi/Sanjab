@@ -10,7 +10,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
-
+from exam.models import Evaluation
 class FrontQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model=Question
@@ -91,3 +91,8 @@ class UserAnswerSerializer(serializers.Serializer):
                 AnswerQuestion.objects.bulk_create(user_answers)
         return Response("done",status=status.HTTP_200_OK)
 
+
+class EvaluationModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Evaluation
+        fields='__all__'

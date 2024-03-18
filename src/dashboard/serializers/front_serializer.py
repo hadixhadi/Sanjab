@@ -51,3 +51,6 @@ class UserDoneContentsModelSerializer(serializers.ModelSerializer):
         course_id=self.context.get('course_id')
         ser_data=ContentModelSerializer(instance=content_obj)
         return ser_data.data
+
+
+

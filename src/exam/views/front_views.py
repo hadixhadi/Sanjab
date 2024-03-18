@@ -64,23 +64,40 @@ class CommitExam(views.APIView):
         :param course_id: id of course that user can check
         :return:
         """
+        session_id=request.GET.get('session')
+        session=SessionStore(session_key=session_id)
+        child_national_code=session['current_user_child']
+        child = ChildUser.objects.get(national_code=child_national_code)
+        exam = Exam.objects.get(id=content_id)
 
-        user_course_obj=UserCourse.get_user_course(request=request,course_id=course_id)
-        course = user_course_obj.course
-        module = course.module_rel.first()
-        age = datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
-        content_exam = module.content_rel.get(
-                Q(age__lte=age.days) & Q(content_type__model='exam') &
-                Q(pk=content_id)
-            )
-
-        ser_data=UserAnswerSerializer(data=request.data,context={'request':request,
-                                                                 'content_exam':content_exam,
-                                                                 'course_id':course_id})
-        if ser_data.is_valid():
-            ser_data.create(ser_data.validated_data)
+        if ExamDone.objects.filter(user=request.user,child=child,exam=exam).exists():
+            return Response("this exam already done!",status=status.HTTP_403_FORBIDDEN)
         else:
-            return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
+            user_course_obj=UserCourse.get_user_course(request=request,course_id=course_id)
+            course = user_course_obj.course
+            module = course.module_rel.first()
+            age = datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
+            content_exam = module.content_rel.get(
+                    Q(age__lte=age.days) & Q(content_type__model='exam') &
+                    Q(pk=content_id)
+                )
 
-        return Response(ser_data.data,status=status.HTTP_200_OK)
+            ser_data=UserAnswerSerializer(data=request.data,context={'request':request,
+                                                                     'content_exam':content_exam,
+                                                                     'course_id':course_id})
+            if ser_data.is_valid():
+                ser_data.create(ser_data.validated_data)
+                exam_done=ExamDone.objects.create(
+                    user=request.user,
+                    child=child,
+                   exam=exam
+                )
+                exam_done.save()
+            else:
+                return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
+
+            return JsonResponse({
+                "data":ser_data.data,
+                "is_complete":True
+            })
 

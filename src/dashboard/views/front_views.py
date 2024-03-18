@@ -11,6 +11,8 @@ from accounts.models import ChildUser
 from accounts.serializers.front_serializer import ChildRegisterSerializer
 import pytz
 from django.contrib.sessions.backends.db import SessionStore
+from exam.models import Evaluation
+from exam.serializers.front_serializer import EvaluationModelSerializer
 # Create your views here.
 
 
@@ -119,7 +121,7 @@ class ShowCourseContentsView(views.APIView):
             course = user_course_obj.course
             print(course)
         except Exception as e:
-            return Response(user_course_obj.data,status=status.HTTP_400_BAD_REQUEST)
+            return Response(str(e),status=status.HTTP_400_BAD_REQUEST)
         module=course.module_rel.first()
         age=datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
 
@@ -186,8 +188,16 @@ class CoursesByChild(views.APIView):
     """
     Status of registered courses by child
     """
-    def get(self,request):
-        user_courses=UserCourse.objects.filter(user=request.user)
+    def get(self,request,national_code):
+        user_courses=UserCourse.objects.filter(user=request.user,child__national_code=national_code)
         ser_data=UserCourseModelSerializer(instance=user_courses,many=True)
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
+
+
+class ChildValues(views.APIView):
+    def get(self,request,national_code):
+        child_values=Evaluation.objects.filter(user=request.user,
+                                               child__national_code=national_code)
+        ser_data=EvaluationModelSerializer(instance=child_values,many=True)
+        return Response(ser_data.data,status=status.HTTP_200_OK)
