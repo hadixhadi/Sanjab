@@ -55,7 +55,7 @@ class FrontShowQuestions(views.APIView):
 
 
 class CommitExam(views.APIView):
-    def post(self, request, course_id,content_id,):
+    def post(self, request, course_id,content_id,national_code):
         """
         show questions of exam
         this means user entered in dashboard as parent user:
@@ -64,10 +64,10 @@ class CommitExam(views.APIView):
         :param course_id: id of course that user can check
         :return:
         """
-        session_id=request.GET.get('session')
-        session=SessionStore(session_key=session_id)
-        child_national_code=session['current_user_child']
-        child = ChildUser.objects.get(national_code=child_national_code)
+        # session_id=request.GET.get('session')
+        # session=SessionStore(session_key=session_id)
+        # child_national_code=session['current_user_child']
+        child = ChildUser.objects.get(national_code=national_code)
         exam = Exam.objects.get(id=content_id)
 
         if ExamDone.objects.filter(user=request.user,child=child,exam=exam).exists():
