@@ -184,7 +184,10 @@ class Logout(APIView):
 
 class RegisterHusband(APIView):
     def post(self,request):
-        husband=request.user.user_profile_husband.first().user
+        try:
+            husband=request.user.user_profile_husband.first().user
+        except Exception as e:
+            husband =None
         if husband is None :
             ser_data=RegisterHusbandModelSerializer(data=request.data,context={'request':request})
             if ser_data.is_valid():

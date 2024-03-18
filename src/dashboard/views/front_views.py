@@ -1,17 +1,18 @@
 from rest_framework import views, status
 from dashboard.serializers.front_serializer import *
 from rest_framework.response import Response
-from courses.models import UserCourse, ModuleSchedule, Course,  UserDoneContent
+from courses.models import UserCourse, ModuleSchedule, Course, UserDoneContent, ContentPrerequisite
 from courses.serializers.front_serializer import (UserCourseModelSerializer ,
     ModuleScheduleSerializer , ContentModelSerializer
                                                   )
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Exists
 from datetime import datetime
 from accounts.models import ChildUser
 from accounts.serializers.front_serializer import ChildRegisterSerializer
 import pytz
 from django.contrib.sessions.backends.db import SessionStore
 # Create your views here.
+
 
 
 class EntryDashboardView(views.APIView):
@@ -29,6 +30,8 @@ class EntryDashboardView(views.APIView):
         instance=get_user_model().objects.get(national_code=request.user.national_code)
         ser_data=UserSerializer(instance=instance)
         return Response(ser_data.data,status=status.HTTP_200_OK)
+
+
 
 class UserCoursesView(views.APIView):
     """
@@ -54,6 +57,8 @@ class UserCoursesView(views.APIView):
         ser_data=UserCourseModelSerializer(instance=obj,many=True)
         return Response(ser_data.data)
 
+
+
 class UserCourseModules(views.APIView):
     def get(self,request,id):
         user=request.user
@@ -69,6 +74,8 @@ class UserCourseModules(views.APIView):
         )
         ser_data=ModuleScheduleSerializer(instance=module_schedule_obj,many=True)
         return Response(ser_data.data,status=status.HTTP_200_OK)
+
+
 
 class ChangeChildUserView(views.APIView):
     """
@@ -93,6 +100,8 @@ class ChangeChildUserView(views.APIView):
         print(f"current user : {session['current_user']}")
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
+
+
 class ShowCourseContentsView(views.APIView):
     """
     user can check contents of course that already registered
@@ -108,6 +117,7 @@ class ShowCourseContentsView(views.APIView):
         try:
             user_course_obj=UserCourse.get_user_course(request=request,course_id=course_id)
             course = user_course_obj.course
+            print(course)
         except Exception as e:
             return Response(user_course_obj.data,status=status.HTTP_400_BAD_REQUEST)
         module=course.module_rel.first()
@@ -119,7 +129,25 @@ class ShowCourseContentsView(views.APIView):
         all_done_contents=UserDoneContent.objects.filter(user=request.user,
                                                          course=course).count()
 
+
+
         if all_done_contents <= all_contents:
+            #chatgpt
+            # completed_contents = Content.objects.filter(
+            #     content_user_watch_contents__user=request.user,  # Filter by the user
+            #     content_user_watch_contents__content_id=OuterRef('prerequisite_content_id')
+            #     # Join with prerequisite_content
+            # )
+            #
+            # # Query the ContentPrerequisite table to get the main contents
+            # main_contents = ContentPrerequisite.objects.filter(
+            #     Exists(completed_contents)  # Filter by the completed_contents subquery
+            # ).values('content')
+            #
+            # # Retrieve the actual Content objects
+            # result = Content.objects.filter(id__in=main_contents)
+
+            #end chat gpt
             contents=module.content_rel.filter(
                 age__lte=age.days
             )
@@ -127,11 +155,13 @@ class ShowCourseContentsView(views.APIView):
                                               context={'request': request,
                                                         'course_id':course_id})
         else:
+
             all_done_contents = UserDoneContent.objects.filter(user=request.user,course=course)
             ser_data=UserDoneContentsModelSerializer(instance=all_done_contents,many=True)
 
 
         return Response(ser_data.data,status=status.HTTP_200_OK)
+
 
 
 
@@ -148,6 +178,7 @@ class ModifyChildView(views.APIView):
             new_ser_data=ChildRegisterSerializer(instance=child)
             return Response(new_ser_data.data,status=status.HTTP_200_OK)
         return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
