@@ -68,19 +68,18 @@ class CommitExam(views.APIView):
         # session=SessionStore(session_key=session_id)
         # child_national_code=session['current_user_child']
         child = ChildUser.objects.get(national_code=national_code)
-        exam = Exam.objects.get(id=content_id)
-
+        user_course_obj = UserCourse.get_user_course(request=request, course_id=course_id)
+        course = user_course_obj.course
+        module = course.module_rel.first()
+        age = datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
+        content_exam = module.content_rel.get(
+            Q(age__lte=age.days) & Q(content_type__model='exam') &
+            Q(pk=content_id)
+        )
+        exam = Exam.objects.get(pk=content_exam.object_id)
         if ExamDone.objects.filter(user=request.user,child=child,exam=exam).exists():
             return Response("this exam already done!",status=status.HTTP_403_FORBIDDEN)
         else:
-            user_course_obj=UserCourse.get_user_course(request=request,course_id=course_id)
-            course = user_course_obj.course
-            module = course.module_rel.first()
-            age = datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
-            content_exam = module.content_rel.get(
-                    Q(age__lte=age.days) & Q(content_type__model='exam') &
-                    Q(pk=content_id)
-                )
 
             ser_data=UserAnswerSerializer(data=request.data,context={'request':request,
                                                                      'content_exam':content_exam,
