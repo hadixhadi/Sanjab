@@ -89,7 +89,7 @@ class UserAnswerSerializer(serializers.Serializer):
                    user_course.save()
             else:
                 AnswerQuestion.objects.bulk_create(user_answers)
-        return Response("done",status=status.HTTP_200_OK)
+        # return Response("done",status=status.HTTP_200_OK)
 
 
 class EvaluationModelSerializer(serializers.ModelSerializer):
