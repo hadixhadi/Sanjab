@@ -28,7 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ModifyChildSerializer(serializers.ModelSerializer):
     class Meta:
         model=ChildUser
-        exclude=("national_code","type","parent")
+        exclude=("national_code","parent")
 
 
 

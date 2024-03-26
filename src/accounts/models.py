@@ -90,6 +90,7 @@ class ChildUser(models.Model):
     parent=models.ForeignKey(User,on_delete=models.CASCADE
                              ,related_name="father_child",null=True,blank=True)
     type=models.SmallIntegerField(choices=TYPE)
+    which_child=models.CharField(max_length=50,null=True,blank=True)
     def __str__(self):
         return f"{self.first_name}  {self.parent}"
 
