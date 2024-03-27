@@ -73,11 +73,13 @@ class UserAnswerSerializer(serializers.Serializer):
             course_id=self.context.get("course_id")
             user=request.user
             exam=self.context.get('content_exam')
+            child_national_code=self.context.get('child_national_code')
+            child=ChildUser.objects.get(national_code=child_national_code)
             exam_obj=Exam.objects.get(pk=exam.object_id)
             for question_id,answer_id in answers_data.items():
                 question_instance=Question.objects.get(pk=question_id)
                 user_answers.append(AnswerQuestion(user=user,exam=exam_obj,
-                                                  question=question_instance,answer=answer_id
+                                                  question=question_instance,answer=answer_id,child=child
                                                    ))
             if exam_obj.is_last:
                AnswerQuestion.objects.bulk_create(user_answers)

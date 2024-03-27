@@ -77,13 +77,14 @@ class CommitExam(views.APIView):
             Q(pk=content_id)
         )
         exam = Exam.objects.get(pk=content_exam.object_id)
-        if ExamDone.objects.filter(user=request.user,child=child,exam=exam).exists():
+        if ExamDone.objects.filter(Q(user=request.user)&Q(child=child)&Q(exam=exam)).exists():
             return Response("this exam already done!",status=status.HTTP_403_FORBIDDEN)
 
         else:
             ser_data=UserAnswerSerializer(data=request.data,context={'request':request,
                                                                      'content_exam':content_exam,
-                                                                     'course_id':course_id})
+                                                                     'course_id':course_id,
+                                                                     'child_national_code':child.national_code})
             if ser_data.is_valid():
                 ser_data.create(ser_data.validated_data)
                 exam_done=ExamDone.objects.create(
