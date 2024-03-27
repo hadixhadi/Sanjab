@@ -27,8 +27,8 @@ class EntryDashboardView(views.APIView):
         session['current_user']=request.user.national_code
         session['current_user_child']=None
         session.save()
-        print(f"current user : {session['current_user']}")
-        print(f"current child : {session['current_user_child']}")
+        # print(f"current user : {session['current_user']}")
+        # print(f"current child : {session['current_user_child']}")
         instance=get_user_model().objects.get(national_code=request.user.national_code)
         ser_data=UserSerializer(instance=instance)
         return Response(ser_data.data,status=status.HTTP_200_OK)
@@ -98,8 +98,8 @@ class ChangeChildUserView(views.APIView):
         session['current_user_child']=national_code
         session['current_user']=national_code
         session.save()
-        print(f" current child user : {session['current_user_child']}")
-        print(f"current user : {session['current_user']}")
+        # print(f" current child user : {session['current_user_child']}")
+        # print(f"current user : {session['current_user']}")
         return Response(ser_data.data,status=status.HTTP_200_OK)
 
 
