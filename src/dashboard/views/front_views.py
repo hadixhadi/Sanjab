@@ -155,7 +155,7 @@ class ShowCourseContentsView(views.APIView):
             )
             ser_data = ContentModelSerializer(instance=contents, many=True,
                                               context={'request': request,
-                                                        'course_id':course_id})
+                                                       'course_id':course_id})
         else:
 
             all_done_contents = UserDoneContent.objects.filter(user=request.user,course=course)
