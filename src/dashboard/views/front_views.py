@@ -50,7 +50,8 @@ class UserCoursesView(views.APIView):
         session=SessionStore(session_key=session_id)
         if session['current_user_child'] != None:
             child=ChildUser.objects.get(national_code=session['current_user_child'])
-            obj=UserCourse.objects.filter(Q(user=request.user)& Q(child=child) & Q(is_active=True)).exclude(
+            obj=UserCourse.objects.filter(Q(user=request.user)& Q(child=child)
+                                          & Q(is_active=True) & Q(course__type=child.type)).exclude(
                 Q(expire_at__lte=datetime.now(pytz.timezone("Asia/Tehran")))
             )
 
