@@ -102,7 +102,4 @@ class EvaluationModelSerializer(serializers.ModelSerializer):
 
 
 
-class ExamDoneModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model=ExamDone
-        fields='__all__'
+

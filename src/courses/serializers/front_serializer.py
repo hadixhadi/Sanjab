@@ -1,5 +1,4 @@
 from exam.serializers.front_serializer import *
-from exam.serializers.front_serializer import ExamDoneModelSerializer
 from courses.models import *
 from exam.models import Exam , ExamDone
 from rest_framework import serializers
@@ -21,6 +20,12 @@ class VideoContentModelSerializer(serializers.ModelSerializer):
 class ExamSerializer(serializers.ModelSerializer):
     class Meta:
         model=Exam
+        fields='__all__'
+
+
+class ExamDoneModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=ExamDone
         fields='__all__'
 class ContentModelSerializer(serializers.ModelSerializer):
     content=serializers.SerializerMethodField()
