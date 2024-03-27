@@ -98,3 +98,11 @@ class EvaluationModelSerializer(serializers.ModelSerializer):
     class Meta:
         model=Evaluation
         fields='__all__'
+
+
+
+
+class ExamDoneModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=ExamDone
+        fields='__all__'

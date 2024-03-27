@@ -18,7 +18,7 @@ class ExamAdmin(admin.ModelAdmin):
 
 @admin.register(AnswerQuestion)
 class AnswerQuestionAdmin(admin.ModelAdmin):
-    list_display = ['id','user','exam','question','answer']
+    list_display = ['id','user','child','exam','question','answer']
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
     list_display=['user','child','exam','grade']

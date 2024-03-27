@@ -119,7 +119,6 @@ class ShowCourseContentsView(views.APIView):
         try:
             user_course_obj=UserCourse.get_user_course(request=request,course_id=course_id)
             course = user_course_obj.course
-            print(course)
         except Exception as e:
             return Response(str(e),status=status.HTTP_400_BAD_REQUEST)
         module=course.module_rel.first()
