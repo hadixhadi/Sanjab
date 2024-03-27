@@ -29,7 +29,7 @@ class ContentModelSerializer(serializers.ModelSerializer):
         model=Content
         fields='__all__'
 
-    def get_done_exams(self,obj):
+    def get_content(self,obj):
         content_type = obj.content_type
         model_class = content_type.model_class()
         item_id = obj.object_id
@@ -47,7 +47,7 @@ class ContentModelSerializer(serializers.ModelSerializer):
             return serializer.data
 
 
-    def done_exams(self,obj):
+    def get_done_exams(self,obj):
         request=self.context.get('request')
         session_id = request.GET.get('session')
         session = SessionStore(session_key=session_id)
