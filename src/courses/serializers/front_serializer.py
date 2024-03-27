@@ -29,7 +29,7 @@ class ContentModelSerializer(serializers.ModelSerializer):
         model=Content
         fields='__all__'
 
-    def get_content(self,obj):
+    def get_done_exams(self,obj):
         content_type = obj.content_type
         model_class = content_type.model_class()
         item_id = obj.object_id
