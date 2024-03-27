@@ -51,7 +51,7 @@ class ShowExamSerializer(serializers.Serializer):
         model_class = content_type_obj.model_class()
         item_id = obj.object_id
         content_type=ContentType.objects.get(model="exam")
-        content=Content.objects.get(Q(content_type=content_type) & Q(object_id=item_id))
+        content=Content.objects.filter(Q(content_type=content_type) & Q(object_id=item_id)).first()
         return content.is_exam_writeable
 
 

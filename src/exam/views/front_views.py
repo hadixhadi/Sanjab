@@ -26,7 +26,7 @@ class FrontShowQuestions(views.APIView):
             user_course_obj=UserCourse.get_user_course(request=request,course_id=course_id)
             course = user_course_obj.course
         except Exception as e:
-            return Response(user_course_obj.data,status=status.HTTP_400_BAD_REQUEST)
+            return Response(str(e),status=status.HTTP_400_BAD_REQUEST)
         module = course.module_rel.first()
         age = datetime.now(tz=pytz.timezone("Asia/Tehran")) - user_course_obj.created_at
 
