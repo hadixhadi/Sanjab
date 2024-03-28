@@ -26,7 +26,7 @@ class ExamSerializer(serializers.ModelSerializer):
 class ExamDoneModelSerializer(serializers.ModelSerializer):
     class Meta:
         model=ExamDone
-        fields='__all__'
+        fields=['exam']
 class ContentModelSerializer(serializers.ModelSerializer):
     content=serializers.SerializerMethodField()
     # progress_process=serializers.SerializerMethodField()

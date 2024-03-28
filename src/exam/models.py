@@ -77,14 +77,14 @@ class Evaluation(models.Model):
         return f"{self.user} -- {self.grade} -- {self.exam}"
 
     @classmethod
-    def evaluate_exam(cls,request, exam_id, course_id):
+    def evaluate_exam(cls,request, exam_id, child_national_code):
         types = Question.TYPE
         # request = get_user_model().objects.get(national_code=request.user.national_code)
         user_answers = AnswerQuestion.objects.filter(user=request.user, exam=exam_id)
         exam_obj = Exam.objects.get(id=exam_id)
         session_id = request.GET.get('session')
         session = SessionStore(session_key=session_id)
-        child_national_code = session['current_user_child']
+        # child_national_code = session['current_user_child']
         child = ChildUser.objects.get(national_code=child_national_code)
         try:
             with transaction.atomic():

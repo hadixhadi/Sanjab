@@ -84,7 +84,7 @@ class UserAnswerSerializer(serializers.Serializer):
             if exam_obj.is_last:
                AnswerQuestion.objects.bulk_create(user_answers)
                evaluated_exam = Evaluation.evaluate_exam(request=request,
-                                           exam_id=exam_obj.id,course_id=course_id)
+                                           exam_id=exam_obj.id,child_national_code=child_national_code)
                if evaluated_exam:
                    user_course=UserCourse.get_user_course(request=request,course_id=course_id)
                    user_course.is_graduated=True
