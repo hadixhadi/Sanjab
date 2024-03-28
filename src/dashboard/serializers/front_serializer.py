@@ -17,7 +17,10 @@ class UserSerializer(serializers.ModelSerializer):
     def get_user_profile(self,obj):
         user_national_code=obj.national_code
         user=get_user_model().objects.get(national_code=user_national_code)
-        user_profile=UserProfile.objects.get(user=user)
+        try:
+            user_profile=UserProfile.objects.get(user=user)
+        except :
+            user_profile=None
         return UserProfileModelSerializer(instance=user_profile).data
     def get_children(self,obj):
         childes=obj.father_child.all()
