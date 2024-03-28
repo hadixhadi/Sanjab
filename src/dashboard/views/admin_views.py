@@ -101,3 +101,13 @@ class ShowStatics(APIView):
         simple_statics=SimpleStattic.objects.all()
         ser_data=SimpleStaticSerializer(instance=simple_statics,many=True)
         return Response(ser_data.data,status=status.HTTP_200_OK)
+
+
+
+class InactiveUser(APIView):
+    permission_classes = [IsSuperAdminUser]
+    def get(self,request,national_code):
+        user=get_user_model().objects.get(Q(national_code=national_code) & Q(is_super_admin=False))
+        user.is_active=False
+        user.save()
+        return Response('user inactive successfully',status=status.HTTP_200_OK)
