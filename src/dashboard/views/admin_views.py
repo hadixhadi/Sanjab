@@ -57,7 +57,7 @@ class ShowUsers(APIView):
 class ShowDetailsUsers(APIView):
     permission_classes = [IsAdminUser]
     def get(self,request,national_code):
-        user=get_user_model().objects.get(Q(national_code=national_code)& Q(is_admin=False))
+        user=get_user_model().objects.get(national_code=national_code)
         ser_data=UserSerializer(instance=user)
         return Response(ser_data.data,status=status.HTTP_200_OK)
 

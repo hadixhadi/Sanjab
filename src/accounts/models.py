@@ -83,7 +83,7 @@ class ChildUser(models.Model):
     ]
     first_name=models.CharField(max_length=100)
     last_name=models.CharField(max_length=100)
-    national_code=models.CharField(max_length=100,primary_key=True)
+    national_code=models.CharField(max_length=10,primary_key=True)
     birth_date=models.DateField(null=True,blank=True)
     grade=models.CharField(max_length=50)
     school_address=models.CharField(max_length=100)
