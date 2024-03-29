@@ -260,6 +260,9 @@ class UserDoneContent(models.Model):
         session_id=request.GET.get('session')
         session=SessionStore(session_key=session_id)
 
+        child_national_code = session['current_user_child']
+        child = ChildUser.objects.get(national_code=child_national_code)
+
         contents = module.content_rel.get(
             Q(age__lte=age.days) &
             Q(pk=content_id) & Q(object_id=object_id)
@@ -270,7 +273,8 @@ class UserDoneContent(models.Model):
         try:
             user_done_content_obj = get_object_or_404(UserDoneContent,
                                                       user=request.user,
-                                                      content=contents)
+                                                      content=contents,
+                                                      child=child)
             if user_done_content_obj is not None:
                 return Response('this content set done already!',
                                 status=status.HTTP_403_FORBIDDEN)
@@ -283,8 +287,6 @@ class UserDoneContent(models.Model):
                     course=course
                 )
                 if session['current_user_child'] != None:
-                    child_national_code = session['current_user_child']
-                    child = ChildUser.objects.get(national_code=child_national_code)
                     done_content_obj.child=child
                 done_content_obj.save()
                 return Response("content set done successfully", status=status.HTTP_200_OK)
