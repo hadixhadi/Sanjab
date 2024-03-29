@@ -30,6 +30,10 @@ class Course(models.Model):
         return self.name
 
 
+class CourseSettings(models.Model):
+    title=models.CharField(max_length=50,null=True)
+    expire_day=models.SmallIntegerField()
+
 
 
 
@@ -81,7 +85,9 @@ class UserCourse(models.Model):
             session = SessionStore(ser_data.validated_data['session_id'])
             course_id = ser_data.validated_data['course']
             course = Course.objects.get(pk=course_id)
-            expire_date = datetime.now() + timedelta(days=10)
+            course_setting=CourseSettings.objects.get()
+            expire_day=course_setting.expire_day
+            expire_date = datetime.now() + timedelta(days=expire_day)
 
             # if user enter dashboard as child user
             if session['current_user_child'] != None:
@@ -90,10 +96,15 @@ class UserCourse(models.Model):
                 if course.type == child_user.type:
 
 
-                    user_course_obj=UserCourse.objects.filter(
+                    user_course_obj=UserCourse.objects.get(
                         Q(user=request.user) & Q(course=course)
-                         & Q(child=child_user)).exists()
-                    if user_course_obj: # if user already registered a course
+                         & Q(child=child_user))
+                    if user_course_obj and user_course_obj.is_active==False: # if user already registered a course
+                        user_course_obj.expire_at=expire_date
+                        user_course_obj.is_active=True
+                        user_course_obj.save()
+                        user_course = user_course_obj
+                    elif user_course_obj:
                         return Response("you have already registered this course!",
                                         status=status.HTTP_403_FORBIDDEN)
                     else:
@@ -109,7 +120,14 @@ class UserCourse(models.Model):
                     return Response("your type is not equal with course type",
                                     status=status.HTTP_403_FORBIDDEN)
             elif request.user.type in [1, 2]:
-                if UserCourse.objects.filter(Q(user=request.user) & Q(course=course)).exists():
+                user_course_obj=UserCourse.objects.get(Q(user=request.user) &
+                                                          Q(course=course))
+                if user_course_obj and user_course_obj.is_active == False:  # if user already registered a course
+                    user_course_obj.expire_at = expire_date
+                    user_course_obj.is_active = True
+                    user_course_obj.save()
+                    user_course = user_course_obj
+                elif user_course_obj:
                     return Response("you have already registered this course!",
                                     status=status.HTTP_403_FORBIDDEN)
                 else:
@@ -146,16 +164,22 @@ class UserCourse(models.Model):
                 every=expire_date.day,
                 period=IntervalSchedule.DAYS
             )
-            PeriodicTask.objects.create(
-                name=f"expire course {user_course.id} ",
-                task="courses.tasks.expire_course",
-                interval=interval_instance,
-                one_off=True,
-                kwargs=json.dumps({
-                    "course_id": user_course.id,
-                    "user_national_code": request.user.national_code
-                }),
-            )
+            try:
+                PeriodicTask.objects.create(
+                    name=f"expire course {user_course.id} ",
+                    task="courses.tasks.expire_course",
+                    interval=interval_instance,
+                    one_off=True,
+                    kwargs=json.dumps({
+                        "course_id": user_course.id,
+                        "user_national_code": request.user.national_code
+                    }),
+                )
+            except:
+                per_task=PeriodicTask.objects.get(name=f"expire course {user_course.id} ")
+                per_task.interval=interval_instance
+                per_task.enabled=True
+                per_task.save()
             return Response("course created successfully ", status=status.HTTP_201_CREATED)
 
     @classmethod

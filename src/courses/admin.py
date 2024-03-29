@@ -25,7 +25,9 @@ class UserDoneContentAdmin(admin.ModelAdmin):
     list_display = ['user','content']
 
 
-
+@admin.register(CourseSettings)
+class CourseSettingsAdmin(admin.ModelAdmin):
+    list_display = ['title','expire_day']
 
 
 @admin.register(ContentPrerequisite)

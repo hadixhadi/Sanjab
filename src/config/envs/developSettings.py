@@ -18,8 +18,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'user_register_views': '3/min',
-        'otp_verification_views':'2/min',
-        'enter_phone_number': '2/min'
+        'otp_verification_views':'5/min',
+        'enter_phone_number': '5/min'
     },
 
     'DEFAULT_RENDERER_CLASSES': [
@@ -39,7 +39,7 @@ CORS_ALLOW_ALL_ORIGINS=True
 
 #JWT
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=12),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,

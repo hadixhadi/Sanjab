@@ -67,7 +67,7 @@ services:
       - ./redis-data:/data
     networks:
       - main
-    
+
 
 
   nginx:
