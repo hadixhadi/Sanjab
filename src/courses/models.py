@@ -95,18 +95,19 @@ class UserCourse(models.Model):
 
                 if course.type == child_user.type:
 
-
-                    user_course_obj=UserCourse.objects.get(
-                        Q(user=request.user) & Q(course=course)
-                         & Q(child=child_user))
-                    if user_course_obj and user_course_obj.is_active==False: # if user already registered a course
-                        user_course_obj.expire_at=expire_date
-                        user_course_obj.is_active=True
+                    user_course_obj_bool = UserCourse.objects.filter(Q(user=request.user) &
+                                                                     Q(course=course)).exists()
+                    if user_course_obj_bool and user_course_obj_bool == False:
+                        user_course_obj = UserCourse.objects.get(Q(user=request.user) &
+                                                                 Q(course=course))
+                        user_course_obj.expire_at = expire_date
+                        user_course_obj.is_active = True
                         user_course_obj.save()
                         user_course = user_course_obj
-                    elif user_course_obj:
+                    elif user_course_obj_bool:
                         return Response("you have already registered this course!",
                                         status=status.HTTP_403_FORBIDDEN)
+
                     else:
 
                         user_course = UserCourse.objects.create(
@@ -116,18 +117,21 @@ class UserCourse(models.Model):
                             expire_at=expire_date,
                             is_active=True
                         )
+
                 else:
                     return Response("your type is not equal with course type",
                                     status=status.HTTP_403_FORBIDDEN)
             elif request.user.type in [1, 2]:
-                user_course_obj=UserCourse.objects.get(Q(user=request.user) &
-                                                          Q(course=course))
-                if user_course_obj and user_course_obj.is_active == False:  # if user already registered a course
+                user_course_obj_bool=UserCourse.objects.filter(Q(user=request.user) &
+                                                          Q(course=course)).exists()
+                if user_course_obj_bool and user_course_obj_bool == False:
+                    user_course_obj= UserCourse.objects.get(Q(user=request.user) &
+                                                             Q(course=course))
                     user_course_obj.expire_at = expire_date
                     user_course_obj.is_active = True
                     user_course_obj.save()
                     user_course = user_course_obj
-                elif user_course_obj:
+                elif user_course_obj_bool:
                     return Response("you have already registered this course!",
                                     status=status.HTTP_403_FORBIDDEN)
                 else:
