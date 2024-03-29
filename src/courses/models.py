@@ -96,7 +96,7 @@ class UserCourse(models.Model):
                 if course.type == child_user.type:
 
                     user_course_obj_bool = UserCourse.objects.filter(Q(user=request.user) & Q(child=child_user)&
-                                                                     Q(course=course)).exist()
+                                                                     Q(course=course)).exists()
                     if user_course_obj_bool:
                         user_course_obj = UserCourse.objects.get(Q(user=request.user) & Q(child=child_user)&
                                                                  Q(course=course))
