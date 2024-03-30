@@ -49,7 +49,8 @@ class UserDoneContentsModelSerializer(serializers.ModelSerializer):
         fields='__all__'
 
     def get_content(self,obj):
-        content_obj=Content.objects.get(id=obj.content.id)
+        obj_id=obj['content']['id']
+        content_obj=Content.objects.get(id=obj_id)
         request=self.context.get('request')
         course_id=self.context.get('course_id')
         ser_data=ContentModelSerializer(instance=content_obj)
