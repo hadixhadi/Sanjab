@@ -158,19 +158,20 @@ class ShowCourseContentsView(views.APIView):
                                               context={'request': request,
                                                        'course_id':course_id})
         else:
-            if session['current_user_child']!= None:
-                all_done_contents = UserDoneContent.objects.filter(user=request.user,
-                                                        course=course,
-                                                        child__national_code=session['current_user_child'])
-            else:
-                all_done_contents = UserDoneContent.objects.filter(user=request.user,
-                                                        course=course,
-                                                        )
 
+            all_done_contents = UserDoneContent.objects.filter(user=request.user,
+                                                    course=course,
+                                                    )
             ser_data=UserDoneContentsModelSerializer(instance=all_done_contents,many=True)
 
+        result = {}
+        for i in ser_data.data:
+            for key, value in i.items():
+                if value not in result.values():
+                    result[key] = value
 
-        return Response(ser_data.data,status=status.HTTP_200_OK)
+
+        return Response(result,status=status.HTTP_200_OK)
 
 
 

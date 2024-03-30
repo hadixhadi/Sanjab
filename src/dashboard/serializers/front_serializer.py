@@ -49,7 +49,7 @@ class UserDoneContentsModelSerializer(serializers.ModelSerializer):
         fields='__all__'
 
     def get_content(self,obj):
-        content_obj=Content.objects.get(id=obj.course_id)
+        content_obj=Content.objects.get(id=obj.content.id)
         ser_data=ContentModelSerializer(instance=content_obj)
         return ser_data.data
 
