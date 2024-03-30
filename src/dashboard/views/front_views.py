@@ -131,7 +131,8 @@ class ShowCourseContentsView(views.APIView):
         all_done_contents=UserDoneContent.objects.filter(user=request.user,
                                                          course=course).count()
 
-
+        session_id = request.GET.get('session')
+        session = SessionStore(session_key=session_id)
 
         if all_done_contents <= all_contents:
             #chatgpt
@@ -157,9 +158,15 @@ class ShowCourseContentsView(views.APIView):
                                               context={'request': request,
                                                        'course_id':course_id})
         else:
+            if session['current_user_child']!= None:
+                all_done_contents = UserDoneContent.objects.filter(user=request.user,
+                                                        course=course,
+                                                        child__national_code=session['current_user_child'])
+            else:
+                all_done_contents = UserDoneContent.objects.filter(user=request.user,
+                                                        course=course,
+                                                        )
 
-            all_done_contents = UserDoneContent.objects.filter(user=request.user,
-                                                        course=course).values('user','course').distinct()
             ser_data=UserDoneContentsModelSerializer(instance=all_done_contents,many=True)
 
 
