@@ -54,17 +54,20 @@ class ContentModelSerializer(serializers.ModelSerializer):
 
 
     def get_done_exams(self,obj):
-        request=self.context.get('request')
-        session_id = request.GET.get('session')
-        session = SessionStore(session_key=session_id)
-        if session['current_user_child'] == None:
-            all_exam_done=ExamDone.objects.filter(Q(user=request.user)&Q(child=None))
-            ser_data=ExamDoneModelSerializer(instance=all_exam_done,many=True)
-        else:
-            child_national_code=session['current_user_child']
-            all_exam_done = ExamDone.objects.filter(Q(user=request.user)&Q(child__national_code=child_national_code))
-            ser_data = ExamDoneModelSerializer(instance=all_exam_done, many=True)
-        return ser_data.data
+        try:
+            request=self.context.get('request')
+            session_id = request.GET.get('session')
+            session = SessionStore(session_key=session_id)
+            if session['current_user_child'] == None:
+                all_exam_done=ExamDone.objects.filter(Q(user=request.user)&Q(child=None))
+                ser_data=ExamDoneModelSerializer(instance=all_exam_done,many=True)
+            else:
+                child_national_code=session['current_user_child']
+                all_exam_done = ExamDone.objects.filter(Q(user=request.user)&Q(child__national_code=child_national_code))
+                ser_data = ExamDoneModelSerializer(instance=all_exam_done, many=True)
+            return ser_data.data
+        except:
+            return None
     # def get_progress_process(self,obj):
     #     request=self.context.get("request")
     #     course_id=self.context.get("course_id")

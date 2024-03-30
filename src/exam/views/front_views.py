@@ -92,6 +92,7 @@ class CommitExam(views.APIView):
                     child=child,
                    exam=exam
                 )
+
                 exam_done.save()
             else:
                 return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
