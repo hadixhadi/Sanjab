@@ -42,7 +42,7 @@ class UserSendOtpCode(APIView):
                 otp_code_instance.set_expire_time()
                 otp_code_instance.save()
                 interval_instance=IntervalSchedule.objects.create(
-                            every=2,
+                            every=1,
                             period=IntervalSchedule.MINUTES
                         )
                 PeriodicTask.objects.create(
