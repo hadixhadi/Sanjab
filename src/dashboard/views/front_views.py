@@ -158,7 +158,8 @@ class ShowCourseContentsView(views.APIView):
                                                        'course_id':course_id})
         else:
 
-            all_done_contents = UserDoneContent.objects.filter(user=request.user,course=course).distinct()
+            all_done_contents = UserDoneContent.objects.filter(user=request.user,
+                                                        course=course).values('user','course').distinct()
             ser_data=UserDoneContentsModelSerializer(instance=all_done_contents,many=True)
 
 
