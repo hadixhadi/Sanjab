@@ -158,20 +158,28 @@ class ShowCourseContentsView(views.APIView):
                                               context={'request': request,
                                                        'course_id':course_id})
         else:
+            all_user_childes=request.user.father_child.all()
+            sum=0
+            bs_child=None
+            for child in all_user_childes:
+                all_done_child_contents = UserDoneContent.objects.filter(user=request.user,
+                                                                   course=course,child=child
+                                                                   ).count()
+                if all_done_child_contents > sum :
+                    sum=all_done_contents
+                    bs_child=child
 
             all_done_contents = UserDoneContent.objects.filter(user=request.user,
-                                                    course=course,
-                                                    )
-            ser_data=UserDoneContentsModelSerializer(instance=all_done_contents,many=True)
+                                                               course=course,child=bs_child
+                                                               )
+            ser_data = UserDoneContentsModelSerializer(instance=all_done_contents, many=True)
+        # result = {}
+        # for i in ser_data.data:
+        #     for key, value in i.items():
+        #         if value not in result.values():
+        #             result[key] = value
 
-        result = {}
-        for i in ser_data.data:
-            for key, value in i.items():
-                if value not in result.values():
-                    result[key] = value
-
-
-        return Response(result,status=status.HTTP_200_OK)
+        return Response(ser_data.data,status=status.HTTP_200_OK)
 
 
 
