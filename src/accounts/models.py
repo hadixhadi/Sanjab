@@ -18,8 +18,8 @@ class User(AbstractBaseUser):
     #required fields
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
-    national_code=models.CharField(max_length=10,unique=True,primary_key=True)
-    phone_number=models.CharField(max_length=11,unique=True,null=True,blank=True)
+    national_code=models.CharField(max_length=12,unique=True,primary_key=True)
+    phone_number=models.CharField(max_length=15,unique=True,null=True,blank=True)
     type = models.SmallIntegerField(choices=TYPE, null=True, blank=True)
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['national_code', 'first_name', 'last_name']

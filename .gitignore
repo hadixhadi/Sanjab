@@ -1,6 +1,7 @@
 /venv/
 /pgdata/
 /.env
+.vs
 /ven/
 /yes.pub
 /yes
