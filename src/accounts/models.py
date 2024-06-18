@@ -96,7 +96,7 @@ class ChildUser(models.Model):
 
 
 class OtpCode(models.Model):
-    phone_number=models.CharField(max_length=11,unique=True)
+    phone_number=models.CharField(max_length=15,unique=True)
     code=models.PositiveSmallIntegerField()
     created_time=models.DateTimeField(auto_now_add=True)
     expire_at=models.TimeField(null=True,blank=True)
