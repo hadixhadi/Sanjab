@@ -31,33 +31,41 @@ class UserSendOtpCode(APIView):
         ser_data=RegisterOrLoginSrializer(data=request.data)
         if ser_data.is_valid():
             with transaction.atomic():
-                request.session['user_phone_number']=request.data
-                otp_code=random.randint(1000,9999)
-                phone_number=ser_data.data['phone_number']
+                try:
+                    myusr = User.objects.get(phone_number=request.data['phone_number'])
+                    isactiveuser = myusr.is_active
+                except:
+                    isactiveuser = True
+                if isactiveuser:
+                    request.session['user_phone_number']=request.data
+                    otp_code=random.randint(1000,9999)
+                    phone_number=ser_data.data['phone_number']
 
-                otp_code_instance=OtpCode.objects.create(
-                    phone_number=phone_number,
-                    code=otp_code
-                )
-                otp_code_instance.set_expire_time()
-                otp_code_instance.save()
-                interval_instance=IntervalSchedule.objects.create(
-                            every=1,
-                            period=IntervalSchedule.MINUTES
-                        )
-                PeriodicTask.objects.create(
-                    name=f"remove otp code{otp_code_instance.id}",
-                    task="accounts.tasks.remove_otp_code",
-                    interval=interval_instance,
-                    one_off=True,
-                    kwargs=json.dumps({
-                        "id": otp_code_instance.id
-                    }),
-                    expire_seconds=120
-                )
-                request.session.save()
-                send_otp_code.delay(phone_number=phone_number, otp_code=otp_code)
-                return Response(request.session.session_key,status=status.HTTP_200_OK)
+                    otp_code_instance=OtpCode.objects.create(
+                        phone_number=phone_number,
+                        code=otp_code
+                    )
+                    otp_code_instance.set_expire_time()
+                    otp_code_instance.save()
+                    interval_instance=IntervalSchedule.objects.create(
+                                every=1,
+                                period=IntervalSchedule.MINUTES
+                            )
+                    PeriodicTask.objects.create(
+                        name=f"remove otp code{otp_code_instance.id}",
+                        task="accounts.tasks.remove_otp_code",
+                        interval=interval_instance,
+                        one_off=True,
+                        kwargs=json.dumps({
+                            "id": otp_code_instance.id
+                        }),
+                        expire_seconds=120
+                    )
+                    request.session.save()
+                    send_otp_code.delay(phone_number=phone_number, otp_code=otp_code)
+                    return Response(request.session.session_key,status=status.HTTP_200_OK)
+                else:
+                   return Response(f"User is Block",status=status.HTTP_403_FORBIDDEN)
         else:
             return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
 
