@@ -111,7 +111,7 @@ class UserOtpCodeVerification(APIView):
                 else:
                     return Response('code is wrong', status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
-            return Response(str(e))
+            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
 
 
 class UserRegistrationView(APIView):
