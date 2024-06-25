@@ -1,4 +1,4 @@
-import json
+﻿import json
 import random
 from django.shortcuts import get_object_or_404
 from django.db import transaction
@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from accounts.models import User
 from rest_framework.permissions import AllowAny
-from accounts.tasks import send_otp_code
+from accounts.tasks import send_otp_code , send_nationalcode_faild
 from accounts.models import OtpCode
 from django_celery_beat.models import PeriodicTask , IntervalSchedule
 from rest_framework.permissions import IsAuthenticated
@@ -142,12 +142,16 @@ class UserRegistrationView(APIView):
                     return Response(token_response,status=status.HTTP_201_CREATED)
                     # return Response('registered successfully',status=status.HTTP_201_CREATED)
             else:
+                if (ser_data.errors['national_code'][0] == 'user with this national code already exists.'):
+                    usercodeobj = User.objects.get(national_code=request.data["national_code"])
+                    send_nationalcode_faild(usercodeobj.phone_number, request.data)
+                    return Response(ser_data.errors,status=status.HTTP_403_FORBIDDEN)
                 return Response(ser_data.errors,status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             error_message=str(e)
             return JsonResponse({
                 'error':error_message
-            },status=400)
+            },status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChildRegisterView(APIView):
